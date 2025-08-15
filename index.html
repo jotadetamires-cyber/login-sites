@@ -65,7 +65,7 @@
 <body>
 
 <div class="login-box">
-    <h2>Bem Vindo a SDSMAS</h2>
+    <h2>Bem Vindo a Governo do Distrito de Metarica</h2>
     <input type="text" id="usuario" placeholder="Usuário"><br>
     <input type="password" id="senha" placeholder="Senha"><br>
     <button onclick="login()">Entrar</button>
@@ -84,14 +84,14 @@ async function login() {
     var user = document.getElementById("usuario").value.trim();
     var pass = document.getElementById("senha").value.trim();
 
-    var usuarioCorreto = "jmonteiro";
-    var senhaCorretaHash = "500fb8e54de475b478c00f7993132af529050f83e78a82f5e7b77607c5c558bb"; // jose2025
+    var usuarioCorreto = "Governo";
+    var senhaCorretaHash = "500fb8e54de475b478c00f7993132af529050f83e78a82f5e7b77607c5c558bb"; // metarica2025
 
     var passHash = await gerarHash(pass);
 
     if (user === usuarioCorreto && passHash === senhaCorretaHash) {
         // Aqui pode ser qualquer link, inclusive do Google Sites
-        window.location.href = "https://sites.google.com/view/sdsmasmetarca/p%C3%A1gina-inicial/planificacao-e-monitoria-avaliacao/monitoria-avaliacao";
+        window.location.href = "https://sites.google.com/d/17FiNovlYfLAIb-YASC7v8EN4qo0JpyCm/p/1TkJkepFgS9TQZnhEfCCvcEjBF7xh9uar/edit";
     } else {
         document.getElementById("mensagem").innerHTML = "Usuário ou senha incorretos.";
     }

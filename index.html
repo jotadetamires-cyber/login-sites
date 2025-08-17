@@ -5,7 +5,7 @@
 <title>Login</title>
 <style>
     body {
-        font-family: Time New roman, sans-serif;
+        font-family: Georgia, sans-serif;
         background: linear-gradient(to right, #4CAF50, #2e8b57);
         display: flex;
         justify-content: center;
@@ -23,7 +23,7 @@
         animation: fadeIn 0.8s ease-in-out;
     }
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
+        from { opacity: 0; transform: translateY(-30px); }
         to { opacity: 1; transform: translateY(0); }
     }
     .login-box h2 {
@@ -58,14 +58,14 @@
     #mensagem {
         color: red;
         margin-top: 10px;
-        font-size: 14px;
+        font-size: 18px;
     }
 </style>
 </head>
 <body>
 
 <div class="login-box">
-    <h2>Bem Vindo a Governo do Distrito de Metarica</h2>
+    <h2>Bem Vindo a Base de Analise de Dados</h2>
     <input type="text" id="usuario" placeholder="Usuário"><br>
     <input type="password" id="senha" placeholder="Senha"><br>
     <button onclick="login()">Entrar</button>
@@ -84,14 +84,14 @@ async function login() {
     var user = document.getElementById("usuario").value.trim();
     var pass = document.getElementById("senha").value.trim();
 
-    var usuarioCorreto = "Governo";
-    var senhaCorretaHash = "500fb8e54de475b478c00f7993132af529050f83e78a82f5e7b77607c5c558bb"; // metarica2025
+    var usuarioCorreto = "jmonteiro";
+    var senhaCorretaHash = "500fb8e54de475b478c00f7993132af529050f83e78a82f5e7b77607c5c558bb"; // jose2025
 
     var passHash = await gerarHash(pass);
 
     if (user === usuarioCorreto && passHash === senhaCorretaHash) {
         // Aqui pode ser qualquer link, inclusive do Google Sites
-        window.location.href = "https://sites.google.com/d/17FiNovlYfLAIb-YASC7v8EN4qo0JpyCm/p/1w5WXO0R-puJhnvW09toTe59q0rrrnyCm/edit?pli=1";
+        window.location.href = "https://docs.google.com/spreadsheets/d/1RYHxfk0Sm3215Qvsd4C-MwnmivMdKUj9JC5BbB4lKaw/edit?gid=0#gid=0";
     } else {
         document.getElementById("mensagem").innerHTML = "Usuário ou senha incorretos.";
     }

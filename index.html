@@ -65,7 +65,7 @@
 <body>
 
 <div class="login-box">
-    <h2>Bem Vindo a Base de Analise de Dados</h2>
+    <h2>Bem Vindo a Gabinete do Administrador</h2>
     <input type="text" id="usuario" placeholder="Usuário"><br>
     <input type="password" id="senha" placeholder="Senha"><br>
     <button onclick="login()">Entrar</button>
@@ -84,14 +84,14 @@ async function login() {
     var user = document.getElementById("usuario").value.trim();
     var pass = document.getElementById("senha").value.trim();
 
-    var usuarioCorreto = "jmonteiro";
-    var senhaCorretaHash = "500fb8e54de475b478c00f7993132af529050f83e78a82f5e7b77607c5c558bb"; // jose2025
+    var usuarioCorreto = "faresse";
+    var senhaCorretaHash = "500fb8e54de475b478c00f7993132af529050f83e78a82f5e7b77607c5c558bb"; // agostinho2025
 
     var passHash = await gerarHash(pass);
 
     if (user === usuarioCorreto && passHash === senhaCorretaHash) {
         // Aqui pode ser qualquer link, inclusive do Google Sites
-        window.location.href = "https://sites.google.com/d/17FiNovlYfLAIb-YASC7v8EN4qo0JpyCm/p/1q1pZljKJTBDdZcfsZ7qusX0fHWJu2eEH/edit";
+        window.location.href = "https://sites.google.com/view/governodemetarica/servicos-distritais/secretaria-distrital/gabinete-do-administrador";
     } else {
         document.getElementById("mensagem").innerHTML = "Usuário ou senha incorretos.";
     }

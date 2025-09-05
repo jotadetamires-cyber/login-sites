@@ -1,102 +1,227 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-<meta charset="UTF-8">
-<title>Login</title>
-<style>
-    body {
-        font-family: Georgia, sans-serif;
-        background: linear-gradient(to right, #4CAF50, #2e8b57);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-    .login-box {
-        background: #fff;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        width: 320px;
-        text-align: center;
-        animation: fadeIn 0.8s ease-in-out;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .login-box h2 {
-        margin-bottom: 15px;
-        color: #333;
-    }
-    input {
-        width: 90%;
-        padding: 10px;
-        margin: 8px 0;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        outline: none;
-        transition: border 0.3s;
-    }
-    input:focus {
-        border: 1px solid #4CAF50;
-    }
-    button {
-        background: #4CAF50;
-        color: white;
-        padding: 10px;
-        width: 95%;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-    button:hover {
-        background: #45a049;
-    }
-    #mensagem {
-        color: red;
-        margin-top: 10px;
-        font-size: 18px;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro via Google Sheets</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        
+        :root {
+            --primary: #1a73e8;
+            --success: #1e8e3e;
+            --danger: #d93025;
+            --background: #f1f3f4;
+            --surface: #ffffff;
+            --on-surface: #202124;
+            --border: #dadce0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--on-surface);
+        }
+
+        .container {
+            background-color: var(--surface);
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+        }
+        header p {
+            font-size: 0.9rem;
+            color: #5f6368;
+            margin: 0 0 2rem 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #fff;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .btn:hover:not(:disabled) {
+            background-color: #185abc;
+        }
+        .btn:disabled {
+            background-color: #a0c3ff;
+            cursor: not-allowed;
+        }
+        
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #fff;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        .hidden { display: none; }
+
+        #status-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .success {
+            background-color: #e6f4ea;
+            color: var(--success);
+        }
+        .error {
+            background-color: #fce8e6;
+            color: var(--danger);
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
 
-<div class="login-box">
-    <h2>Bem Vindo a Gabinete do Administrador</h2>
-    <input type="text" id="usuario" placeholder="Usuário"><br>
-    <input type="password" id="senha" placeholder="Senha"><br>
-    <button onclick="login()">Entrar</button>
-    <p id="mensagem"></p>
-</div>
+    <div class="container">
+        <header>
+            <h1>Registo de Produtos</h1>
+            <p>Os dados serão enviados diretamente para o Google Sheets.</p>
+        </header>
 
-<script>
-async function gerarHash(texto) {
-    const msgBuffer = new TextEncoder().encode(texto);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+        <form id="product-form">
+            <div class="form-group">
+                <label for="nome_produto">Nome do Produto</label>
+                <input type="text" id="nome_produto" name="nome_produto" required>
+            </div>
+            <div class="form-group">
+                <label for="quantidade">Quantidade</label>
+                <input type="number" id="quantidade" name="quantidade" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="preco_compra">Preço de Compra (MT)</label>
+                <input type="number" id="preco_compra" name="preco_compra" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="preco venda">preco venda (MT)</label>
+                <input type="number" id="venda_unitaria" name="venda_unitaria" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="assinatura">Responsável (Assinatura)</label>
+                <input type="text" id="assinatura" name="assinatura" required>
+            </div>
+            <button type="submit" class="btn" id="submit-btn">
+                <span id="btn-text">Registar Produto</span>
+                <div id="loader" class="loader hidden"></div>
+            </button>
+        </form>
+        <div id="status-message" class="hidden"></div>
+    </div>
 
-async function login() {
-    var user = document.getElementById("usuario").value.trim();
-    var pass = document.getElementById("senha").value.trim();
+    <script>
+        const form = document.getElementById('product-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const loader = document.getElementById('loader');
+        const statusMessage = document.getElementById('status-message');
 
-    var usuarioCorreto = "faresse";
-    var senhaCorretaHash = "500fb8e54de475b478c00f7993132af529050f83e78a82f5e7b77607c5c558bb"; // agostinho2025
+        // !!! IMPORTANTE: Cole aqui a URL da sua aplicação web do Google Apps Script !!!
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYsT0bViq4dPnDR0cqSn8sNXkJItJukWOb6iFJkt6x_7xEeflJLHN1NdAiXBpjYKozmA/exec';
 
-    var passHash = await gerarHash(pass);
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Impede o envio padrão do formulário
 
-    if (user === usuarioCorreto && passHash === senhaCorretaHash) {
-        // Aqui pode ser qualquer link, inclusive do Google Sites
-        window.location.href = "https://sites.google.com/view/governodemetarica/servicos-distritais/secretaria-distrital/gabinete-do-administrador";
-    } else {
-        document.getElementById("mensagem").innerHTML = "Usuário ou senha incorretos.";
-    }
-}
-</script>
+            // Mostra o loader e desativa o botão
+            btnText.classList.add('hidden');
+            loader.classList.remove('hidden');
+            submitBtn.disabled = true;
+            statusMessage.classList.add('hidden');
+
+            // Constrói o objeto de dados a partir do formulário
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => { data[key] = value });
+            
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.result === 'success') {
+                    showMessage(result.message, 'success');
+                    form.reset(); // Limpa o formulário
+                } else {
+                    throw new Error(result.message);
+                }
+            })
+            .catch(error => {
+                showMessage('Erro ao enviar dados: ' + error.message, 'error');
+            })
+            .finally(() => {
+                // Esconde o loader e reativa o botão
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
+                submitBtn.disabled = false;
+            });
+        });
+
+        function showMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = type; // Remove classes antigas e adiciona a nova
+            statusMessage.classList.remove('hidden');
+        }
+    </script>
 
 </body>
 </html>

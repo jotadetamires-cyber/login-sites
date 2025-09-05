@@ -1,227 +1,153 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro via Google Sheets</title>
+    <title>Cadastro de Produto</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-        
-        :root {
-            --primary: #1a73e8;
-            --success: #1e8e3e;
-            --danger: #d93025;
-            --background: #f1f3f4;
-            --surface: #ffffff;
-            --on-surface: #202124;
-            --border: #dadce0;
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        input { padding: 8px; font-size: 1rem; }
+        button { padding: 12px; font-size: 1rem; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        #status { margin-top: 15px; font-weight: bold; }
+        /* Estilo para a área de assinatura */
+        #signature-pad {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: crosshair;
+            margin-top: 10px;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: var(--on-surface);
-        }
-
-        .container {
-            background-color: var(--surface);
-            padding: 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
-            width: 100%;
-            max-width: 500px;
-        }
-
-        header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
-        }
-        header p {
-            font-size: 0.9rem;
-            color: #5f6368;
-            margin: 0 0 2rem 0;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 0.8rem;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #fff;
-            background-color: var(--primary);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background-color 0.2s;
-        }
-        .btn:hover:not(:disabled) {
-            background-color: #185abc;
-        }
-        .btn:disabled {
-            background-color: #a0c3ff;
-            cursor: not-allowed;
-        }
-        
-        .loader {
-            width: 18px;
-            height: 18px;
-            border: 2px solid #fff;
-            border-bottom-color: transparent;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-        }
-        .hidden { display: none; }
-
-        #status-message {
-            margin-top: 1rem;
-            padding: 0.75rem;
-            border-radius: 4px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        .success {
-            background-color: #e6f4ea;
-            color: var(--success);
-        }
-        .error {
-            background-color: #fce8e6;
-            color: var(--danger);
-        }
-
-        @keyframes rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        #signature-preview {
+            margin-top: 10px;
+            border: 1px solid #eee;
+            max-width: 100%;
+            height: auto;
+            display: none; /* Escondido por padrão */
         }
     </style>
 </head>
 <body>
+    
+    <h1>Cadastro de Produto</h1>
+    <form id="productForm">
+        <label for="nomeProduto">Nome do Produto:</label>
+        <input type="text" id="nomeProduto" name="Nome do Produto" required>
 
-    <div class="container">
-        <header>
-            <h1>Registo de Produtos</h1>
-            <p>Os dados serão enviados diretamente para o Google Sheets.</p>
-        </header>
+        <label for="quantidade">Quantidade:</label>
+        <input type="number" id="quantidade" name="Quantidade">
 
-        <form id="product-form">
-            <div class="form-group">
-                <label for="nome_produto">Nome do Produto</label>
-                <input type="text" id="nome_produto" name="nome_produto" required>
-            </div>
-            <div class="form-group">
-                <label for="quantidade">Quantidade</label>
-                <input type="number" id="quantidade" name="quantidade" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="preco_compra">Preço de Compra (MT)</label>
-                <input type="number" id="venda_unitaria" name="venda_unitaria" min="0" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="preco venda">preco venda (MT)</label>
-                <input type="number" id="venda_unitaria" name="venda_unitaria" min="0" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="assinatura">Responsável (Assinatura)</label>
-                <input type="text" id="assinatura" name="assinatura" required>
-            </div>
-            <button type="submit" class="btn" id="submit-btn">
-                <span id="btn-text">Registar Produto</span>
-                <div id="loader" class="loader hidden"></div>
-            </button>
-        </form>
-        <div id="status-message" class="hidden"></div>
-    </div>
+        <label for="precoCompra">Preço de Compra:</label>
+        <input type="number" step="0.01" id="precoCompra" name="Preço de Compra">
+
+        <label for="precoVenda">Preço de Venda:</label>
+        <input type="number" step="0.01" id="precoVenda" name="Preço de Venda">
+
+        <label for="assinatura">Assinatura:</label>
+        <canvas id="signature-pad" width="400" height="200"></canvas>
+        <button type="button" id="clear-signature">Limpar Assinatura</button>
+        <button type="button" id="preview-signature">Pré-visualizar Assinatura</button>
+        <img id="signature-preview" src="#" alt="Pré-visualização da Assinatura">
+        <input type="hidden" id="assinatura" name="Assinatura"> <button type="submit" id="submit-button">Salvar</button>
+    </form>
+    
+    <div id="status"></div>
 
     <script>
-        const form = document.getElementById('product-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const btnText = document.getElementById('btn-text');
-        const loader = document.getElementById('loader');
-        const statusMessage = document.getElementById('status-message');
+        // ######################################################################
+        // ## COLE A URL DO SEU SCRIPT PUBLICADO AQUI DENTRO DAS ASPAS      ##
+        // ######################################################################
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxb3Ekya4ZMKN6osOnlfdZA1PXLzp-vcxdsW8XzVdOeVztJsjEp0bN20z5_bouwNg0/exec";
 
-        // !!! IMPORTANTE: Cole aqui a URL da sua aplicação web do Google Apps Script !!!
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYsT0bViq4dPnDR0cqSn8sNXkJItJukWOb6iFJkt6x_7xEeflJLHN1NdAiXBpjYKozmA/exec';
+        const form = document.getElementById('productForm');
+        const statusDiv = document.getElementById('status');
+        const submitButton = document.getElementById('submit-button');
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Impede o envio padrão do formulário
+        // Elementos da assinatura
+        const signaturePadCanvas = document.getElementById('signature-pad');
+        const clearSignatureButton = document.getElementById('clear-signature');
+        const previewSignatureButton = document.getElementById('preview-signature');
+        const signaturePreviewImg = document.getElementById('signature-preview');
+        const signatureHiddenInput = document.getElementById('assinatura');
+        
+        const signaturePad = new SignaturePad(signaturePadCanvas);
 
-            // Mostra o loader e desativa o botão
-            btnText.classList.add('hidden');
-            loader.classList.remove('hidden');
-            submitBtn.disabled = true;
-            statusMessage.classList.add('hidden');
+        // Esta parte do código lê os dados da URL quando a página carrega
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Preenche os campos do formulário com os dados da URL
+            document.getElementById('nomeProduto').value = urlParams.get('nomeProduto') || '';
+            document.getElementById('quantidade').value = urlParams.get('quantidade') || '';
+            document.getElementById('precoCompra').value = urlParams.get('precoCompra') || '';
+            document.getElementById('precoVenda').value = urlParams.get('precoVenda') || '';
+        });
 
-            // Constrói o objeto de dados a partir do formulário
+        // Eventos para o pad de assinatura
+        clearSignatureButton.addEventListener('click', () => {
+            signaturePad.clear();
+            signaturePreviewImg.style.display = 'none'; // Esconde a pré-visualização
+            signatureHiddenInput.value = ''; // Limpa o valor do input hidden
+        });
+
+        previewSignatureButton.addEventListener('click', () => {
+            if (!signaturePad.isEmpty()) {
+                const dataURL = signaturePad.toDataURL(); // Pega a assinatura como URL de dados
+                signaturePreviewImg.src = dataURL;
+                signaturePreviewImg.style.display = 'block'; // Mostra a imagem de pré-visualização
+            } else {
+                alert('Por favor, faça uma assinatura antes de pré-visualizar.');
+                signaturePreviewImg.style.display = 'none';
+                signatureHiddenInput.value = '';
+            }
+        });
+
+        // Esta parte envia os dados para a planilha quando o formulário é submetido
+        form.addEventListener('submit', e => {
+            e.preventDefault(); // Impede o recarregamento da página
+
+            submitButton.disabled = true;
+            statusDiv.textContent = 'Enviando, por favor aguarde...';
+
             const formData = new FormData(form);
             const data = {};
-            formData.forEach((value, key) => { data[key] = value });
-            
+            // Converte os dados do formulário para um objeto simples
+            formData.forEach((value, key) => (data[key] = value));
+
+            // Adiciona a assinatura aos dados se ela existir
+            if (!signaturePad.isEmpty()) {
+                data['Assinatura'] = signaturePad.toDataURL(); // Converte a assinatura para Data URL
+            } else {
+                data['Assinatura'] = ''; // Envia vazio se não houver assinatura
+            }
+
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify(data),
             })
             .then(response => response.json())
             .then(result => {
-                if (result.result === 'success') {
-                    showMessage(result.message, 'success');
-                    form.reset(); // Limpa o formulário
+                statusDiv.textContent = result.message;
+                if(result.status === 'success') {
+                    statusDiv.style.color = 'green';
+                    form.reset(); // Limpa o formulário após o sucesso
+                    signaturePad.clear(); // Limpa o pad de assinatura
+                    signaturePreviewImg.style.display = 'none'; // Esconde a pré-visualização
+                    signatureHiddenInput.value = ''; // Limpa o input hidden da assinatura
                 } else {
-                    throw new Error(result.message);
+                    statusDiv.style.color = 'red';
                 }
             })
             .catch(error => {
-                showMessage('Erro ao enviar dados: ' + error.message, 'error');
+                console.error('Error:', error);
+                statusDiv.textContent = 'Ocorreu um erro grave. Verifique o console (F12).';
+                statusDiv.style.color = 'red';
             })
             .finally(() => {
-                // Esconde o loader e reativa o botão
-                btnText.classList.remove('hidden');
-                loader.classList.add('hidden');
-                submitBtn.disabled = false;
+                submitButton.disabled = false; // Reativa o botão
             });
         });
-
-        function showMessage(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = type; // Remove classes antigas e adiciona a nova
-            statusMessage.classList.remove('hidden');
-        }
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.0/dist/signature_pad.umd.min.js"></script>
 </body>
 </html>

@@ -1,143 +1,188 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Cadastro de Fornecimento - Papelaria & Gráfica</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro de Fornecimentos</title>
+<style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f7fb;
-      margin: 0;
-      padding: 0;
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
     }
-
     .container {
-      max-width: 700px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        background-color: #fff;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        width: 800px;
     }
-
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
+    h1, h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 15px;
     }
-
+    form {
+        margin-bottom: 20px;
+    }
+    form div {
+        margin-bottom: 8px;
+    }
     label {
-      display: block;
-      margin: 12px 0 6px;
-      font-weight: bold;
+        display: block;
+        margin-bottom: 3px;
+        font-weight: bold;
+        font-size: 14px;
     }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
+    input[type="text"],
+    input[type="number"],
+    select {
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
     }
-
-    textarea {
-      resize: vertical;
-      min-height: 70px;
-    }
-
-    .row {
-      display: flex;
-      gap: 15px;
-    }
-
-    .row .col {
-      flex: 1;
-    }
-
     button {
-      margin-top: 20px;
-      width: 100%;
-      background: #0077ff;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
+        background-color: #28a745;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 15px;
+        display: block;
+        margin: 0 auto;
     }
-
     button:hover {
-      background: #005ec2;
+        background-color: #218838;
     }
-
-    .success {
-      margin-top: 15px;
-      text-align: center;
-      color: green;
-      font-weight: bold;
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        text-align: right;
     }
-  </style>
+    th, td {
+        border: 1px solid #ddd;
+        padding: 6px 8px;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+    select.statusSelect {
+        width: 100%;
+        border: none;
+        background-color: transparent;
+        font-size: 14px;
+        text-align: center;
+    }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Cadastro de Fornecimento</h2>
-    <form id="fornecimentoForm">
-      
-      <label for="fornecedor">Fornecedor / Cliente</label>
-      <input type="text" id="fornecedor" required placeholder="Ex: Papelaria Central Ltda.">
 
-      <label for="material">Material</label>
-      <input type="text" id="material" required placeholder="Ex: Papel A4, Cartazes, Canetas...">
-
-      <div class="row">
-        <div class="col">
-          <label for="quantidade">Quantidade</label>
-          <input type="number" id="quantidade" min="1" required>
+<div class="container">
+    <h1>Cadastro de Fornecimentos</h1>
+    <form id="cadastroForm">
+        <div>
+            <label for="empresa">Nome da Empresa:</label>
+            <input type="text" id="empresa" required>
         </div>
-        <div class="col">
-          <label for="preco">Preço Unitário (MZN)</label>
-          <input type="number" id="preco" step="0.01" required>
+        <div>
+            <label for="fornecedor">Fornecedor:</label>
+            <input type="text" id="fornecedor" required>
         </div>
-      </div>
-
-      <label for="total">Preço Total (MZN)</label>
-      <input type="text" id="total" readonly style="background:#f1f1f1;">
-
-      <label for="data">Data do Fornecimento</label>
-      <input type="date" id="data" required>
-
-      <label for="observacao">Observações</label>
-      <textarea id="observacao" placeholder="Ex: Entrega parcial, material reservado..."></textarea>
-
-      <button type="submit">Salvar Cadastro</button>
-      <div class="success" id="mensagem"></div>
+        <div>
+            <label for="material">Material Fornecido:</label>
+            <input type="text" id="material" required>
+        </div>
+        <div>
+            <label for="quantidade">Quantidade:</label>
+            <input type="number" id="quantidade" required>
+        </div>
+        <div>
+            <label for="preco">Preço Unitário (R$):</label>
+            <input type="number" id="preco" step="0.01" required>
+        </div>
+        <div>
+            <label for="status">Status:</label>
+            <select id="status" required>
+                <option value="">Selecione</option>
+                <option value="Pago">Pago</option>
+                <option value="Não Pago">Não Pago</option>
+            </select>
+        </div>
+        <button type="submit">Cadastrar</button>
     </form>
-  </div>
 
-  <script>
-    const form = document.getElementById('fornecimentoForm');
-    const quantidade = document.getElementById('quantidade');
-    const preco = document.getElementById('preco');
-    const total = document.getElementById('total');
-    const mensagem = document.getElementById('mensagem');
+    <h2>Fornecimentos Cadastrados</h2>
+    <table id="tabelaFornecimentos">
+        <thead>
+            <tr>
+                <th>Empresa</th>
+                <th>Fornecedor</th>
+                <th>Material</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Preço Total</th>
+                <th>Data</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
-    // Calcula total automaticamente
-    function calcularTotal() {
-      const q = parseFloat(quantidade.value) || 0;
-      const p = parseFloat(preco.value) || 0;
-      total.value = (q * p).toFixed(2);
-    }
+<script>
+document.getElementById('cadastroForm').addEventListener('submit', function(event){
+    event.preventDefault();
 
-    quantidade.addEventListener('input', calcularTotal);
-    preco.addEventListener('input', calcularTotal);
+    const empresa = document.getElementById('empresa').value;
+    const fornecedor = document.getElementById('fornecedor').value;
+    const material = document.getElementById('material').value;
+    const quantidade = parseFloat(document.getElementById('quantidade').value);
+    const preco = parseFloat(document.getElementById('preco').value).toFixed(2);
+    const total = (quantidade * preco).toFixed(2);
+    const status = document.getElementById('status').value;
 
-    // Simula salvamento
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      mensagem.textContent = "✅ Cadastro salvo com sucesso!";
-      form.reset();
-      total.value = "";
+    // Data automática
+    const data = new Date();
+    const dataFormatada = data.toLocaleDateString('pt-BR');
+
+    const tabela = document.getElementById('tabelaFornecimentos').getElementsByTagName('tbody')[0];
+    const novaLinha = tabela.insertRow();
+
+    novaLinha.insertCell(0).innerHTML = empresa;
+    novaLinha.insertCell(1).innerHTML = fornecedor;
+    novaLinha.insertCell(2).innerHTML = material;
+    novaLinha.insertCell(3).innerHTML = quantidade;
+    novaLinha.insertCell(4).innerHTML = `R$ ${preco}`;
+    novaLinha.insertCell(5).innerHTML = `R$ ${total}`;
+    novaLinha.insertCell(6).innerHTML = dataFormatada;
+
+    // Status editável
+    const statusCell = novaLinha.insertCell(7);
+    const selectStatus = document.createElement('select');
+    selectStatus.className = 'statusSelect';
+    ['Pago','Não Pago'].forEach(op => {
+        const option = document.createElement('option');
+        option.value = op;
+        option.text = op;
+        if(op === status) option.selected = true;
+        selectStatus.appendChild(option);
     });
-  </script>
+    statusCell.appendChild(selectStatus);
+
+    document.getElementById('cadastroForm').reset();
+});
+</script>
+
 </body>
 </html>

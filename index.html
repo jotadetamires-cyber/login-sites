@@ -11,7 +11,7 @@
     }
     .container {
         background-color: #fff; padding: 20px; border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 700px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 750px;
     }
     h1, h2 { text-align: center; color: #333; }
     form {
@@ -51,7 +51,13 @@
         margin-top: 20px; background: #f2f2f2;
         padding: 10px; border-radius: 6px; font-size: 15px;
     }
+    .pdf-btn {
+        background-color: #007bff; margin-top: 15px;
+    }
+    .pdf-btn:hover { background-color: #0069d9; }
 </style>
+<!-- Biblioteca para gerar PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -83,8 +89,9 @@
     </table>
 
     <div id="relatorioDiario" class="relatorio">
-        <!-- Relatório diário automático aparecerá aqui -->
+        <!-- Relatório diário aparecerá aqui -->
     </div>
+    <button id="btnPDF" class="pdf-btn full-width">Baixar Relatório em PDF</button>
 </div>
 
 <script>
@@ -104,25 +111,30 @@ function criarCelulaEditavel(text, tipo="text"){
 function atualizarRelatorio(){
     const hoje = new Date().toLocaleDateString('pt-BR');
     const linhas = document.querySelectorAll("#tabelaServicos tbody tr");
-    let totalRegistros = 0, totalPago = 0, totalNaoPago = 0, somaValores = 0;
+    let totalRegistros = 0, totalPago = 0, totalNaoPago = 0, somaPago = 0, somaNaoPago = 0;
 
     linhas.forEach(linha=>{
         const data = linha.cells[3].innerText;
         if(data === hoje){
             totalRegistros++;
             const preco = parseFloat(linha.cells[2].querySelector('input').value) || 0;
-            somaValores += preco;
             const status = linha.cells[4].querySelector('select').value;
-            if(status==="Pago") totalPago++;
-            else if(status==="Não Pago") totalNaoPago++;
+            if(status==="Pago"){ totalPago++; somaPago += preco; }
+            else if(status==="Não Pago"){ totalNaoPago++; somaNaoPago += preco; }
         }
     });
 
-    document.getElementById("relatorioDiario").innerHTML =
-        `<b>Relatório de ${hoje}</b><br>
-         Total de Registros: ${totalRegistros}<br>
-         Pagos: ${totalPago} | Não Pagos: ${totalNaoPago}<br>
-         Valor Total do Dia: R$ ${somaValores.toFixed(2)}`;
+    const relatorioTexto = `
+        <b>Relatório Detalhado de ${hoje}</b><br><br>
+        No dia <b>${hoje}</b>, a Papelaria Muipeliua registou um total de <b>${totalRegistros}</b> serviços.
+        Dentre estes, <b>${totalPago}</b> foram marcados como <span style="color:green">PAGO</span>,
+        totalizando um valor recebido de <b>R$ ${somaPago.toFixed(2)}</b>.
+        Por outro lado, <b>${totalNaoPago}</b> serviços permanecem com o status de
+        <span style="color:red">NÃO PAGO</span>, somando um valor pendente de <b>R$ ${somaNaoPago.toFixed(2)}</b>.
+        Este relatório demonstra a movimentação financeira do dia e serve para acompanhamento administrativo.
+    `;
+
+    document.getElementById("relatorioDiario").innerHTML = relatorioTexto;
 }
 
 document.getElementById('cadastroForm').addEventListener('submit', function(event){
@@ -166,7 +178,6 @@ document.getElementById('cadastroForm').addEventListener('submit', function(even
     });
     acaoCell.appendChild(botaoExcluir);
 
-    // Atualizações
     function atualizarTudo(){
         atualizarCorStatus(selectStatus);
         botaoExcluir.disabled = selectStatus.value !== "Pago";
@@ -181,6 +192,30 @@ document.getElementById('cadastroForm').addEventListener('submit', function(even
 
     document.getElementById('cadastroForm').reset();
     atualizarRelatorio();
+});
+
+// 🔹 Botão para gerar PDF
+document.getElementById("btnPDF").addEventListener("click", ()=>{
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const hoje = new Date().toLocaleDateString('pt-BR');
+
+    // Cabeçalho Oficial
+    doc.setFont("times", "bold");
+    doc.setFontSize(14);
+    doc.text("REPÚBLICA DE MOÇAMBIQUE", 105, 20, null, null, "center");
+    doc.text("Papelaria Muipeliua", 105, 28, null, null, "center");
+    doc.text(`Relatório Mensal - ${hoje}`, 105, 36, null, null, "center");
+    doc.line(20, 40, 190, 40);
+
+    // Corpo do Relatório
+    const textoRelatorio = document.getElementById("relatorioDiario").innerText;
+    doc.setFont("times", "normal");
+    doc.setFontSize(14);
+    doc.setLineHeightFactor(1.5);
+    doc.text(textoRelatorio, 20, 50, { maxWidth: 170, align: "justify" });
+
+    doc.save(`Relatorio_Papelaria_${hoje}.pdf`);
 });
 </script>
 

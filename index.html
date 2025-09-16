@@ -3,184 +3,184 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cadastro de Fornecimentos</title>
+<title>Cadastro de Serviços</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        background-color: #f4f4f4;
-        display: flex;
-        justify-content: center;
+        font-family: Arial; margin: 20px;
+        background-color: #f4f4f4; display: flex; justify-content: center;
     }
     .container {
-        background-color: #fff;
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        width: 800px;
+        background-color: #fff; padding: 20px; border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 700px;
     }
-    h1, h2 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 15px;
-    }
+    h1, h2 { text-align: center; color: #333; }
     form {
-        margin-bottom: 20px;
+        margin-bottom: 20px; display: grid;
+        grid-template-columns: 1fr 1fr; gap: 10px 15px;
     }
-    form div {
-        margin-bottom: 8px;
+    form div { display: flex; flex-direction: column; }
+    label { margin-bottom: 3px; font-weight: bold; font-size: 14px; }
+    input, select {
+        width: 100%; padding: 5px; border: 1px solid #ccc;
+        border-radius: 4px; text-align: center; font-size: 14px;
     }
-    label {
-        display: block;
-        margin-bottom: 3px;
-        font-weight: bold;
-        font-size: 14px;
-    }
-    input[type="text"],
-    input[type="number"],
-    select {
-        width: 100%;
-        padding: 5px;
-        box-sizing: border-box;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
-        text-align: center;
-    }
+    .full-width { grid-column: 1 / 3; }
     button {
-        background-color: #28a745;
-        color: white;
-        padding: 8px 12px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 15px;
-        display: block;
-        margin: 0 auto;
+        background-color: #28a745; color: white; padding: 6px 10px;
+        border: none; border-radius: 4px; cursor: pointer;
+        font-size: 14px; grid-column: 1 / 3; justify-self: center;
     }
-    button:hover {
-        background-color: #218838;
-    }
+    button:hover { background-color: #218838; }
     table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        text-align: right;
+        width: 100%; border-collapse: collapse;
+        margin-top: 15px; text-align: left; font-size: 14px;
     }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 6px 8px;
-    }
-    th {
-        background-color: #f2f2f2;
-    }
-    tbody tr:nth-child(odd) {
-        background-color: #f9f9f9;
-    }
+    th, td { border: 1px solid #ddd; padding: 6px; }
+    th { background-color: #f2f2f2; }
+    tbody tr:nth-child(odd) { background-color: #f9f9f9; }
     select.statusSelect {
-        width: 100%;
-        border: none;
-        background-color: transparent;
-        font-size: 14px;
-        text-align: center;
+        width: 100%; border: none; background-color: transparent;
+        text-align: center; font-weight: bold;
+    }
+    button.deleteBtn {
+        background-color: #dc3545; color: white; padding: 4px 8px;
+        border-radius: 4px; border: none; cursor: pointer; font-size: 13px;
+    }
+    button.deleteBtn:hover { background-color: #c82333; }
+    .relatorio {
+        margin-top: 20px; background: #f2f2f2;
+        padding: 10px; border-radius: 6px; font-size: 15px;
     }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Cadastro de Fornecimentos</h1>
+    <h1>Cadastro de Serviços</h1>
     <form id="cadastroForm">
-        <div>
-            <label for="empresa">Nome da Empresa:</label>
-            <input type="text" id="empresa" required>
-        </div>
-        <div>
-            <label for="fornecedor">Fornecedor:</label>
-            <input type="text" id="fornecedor" required>
-        </div>
-        <div>
-            <label for="material">Material Fornecido:</label>
-            <input type="text" id="material" required>
-        </div>
-        <div>
-            <label for="quantidade">Quantidade:</label>
-            <input type="number" id="quantidade" required>
-        </div>
-        <div>
-            <label for="preco">Preço Unitário (R$):</label>
-            <input type="number" id="preco" step="0.01" required>
-        </div>
-        <div>
-            <label for="status">Status:</label>
+        <div><label>Tipo de Serviço:</label><input type="text" id="servico" required></div>
+        <div><label>Assinatura:</label><input type="text" id="assinatura" required></div>
+        <div><label>Preço (R$):</label><input type="number" id="preco" step="0.01" required></div>
+        <div><label>Status:</label>
             <select id="status" required>
                 <option value="">Selecione</option>
                 <option value="Pago">Pago</option>
                 <option value="Não Pago">Não Pago</option>
             </select>
         </div>
-        <button type="submit">Cadastrar</button>
+        <button type="submit" class="full-width">Cadastrar</button>
     </form>
 
-    <h2>Fornecimentos Cadastrados</h2>
-    <table id="tabelaFornecimentos">
+    <h2>Registros Cadastrados</h2>
+    <table id="tabelaServicos">
         <thead>
             <tr>
-                <th>Empresa</th>
-                <th>Fornecedor</th>
-                <th>Material</th>
-                <th>Quantidade</th>
-                <th>Preço Unitário</th>
-                <th>Preço Total</th>
-                <th>Data</th>
-                <th>Status</th>
+                <th>Serviço</th><th>Assinatura</th>
+                <th>Preço</th><th>Data</th><th>Status</th><th>Ações</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
+
+    <div id="relatorioDiario" class="relatorio">
+        <!-- Relatório diário automático aparecerá aqui -->
+    </div>
 </div>
 
 <script>
+function atualizarCorStatus(select){
+    if(select.value === "Pago"){ select.style.color = "green"; }
+    else if(select.value === "Não Pago"){ select.style.color = "red"; }
+    else { select.style.color = "black"; }
+}
+
+function criarCelulaEditavel(text, tipo="text"){
+    const input = document.createElement("input");
+    input.value = text; input.type = tipo;
+    input.style.textAlign = "center"; input.style.width = "95%";
+    return input;
+}
+
+function atualizarRelatorio(){
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    const linhas = document.querySelectorAll("#tabelaServicos tbody tr");
+    let totalRegistros = 0, totalPago = 0, totalNaoPago = 0, somaValores = 0;
+
+    linhas.forEach(linha=>{
+        const data = linha.cells[3].innerText;
+        if(data === hoje){
+            totalRegistros++;
+            const preco = parseFloat(linha.cells[2].querySelector('input').value) || 0;
+            somaValores += preco;
+            const status = linha.cells[4].querySelector('select').value;
+            if(status==="Pago") totalPago++;
+            else if(status==="Não Pago") totalNaoPago++;
+        }
+    });
+
+    document.getElementById("relatorioDiario").innerHTML =
+        `<b>Relatório de ${hoje}</b><br>
+         Total de Registros: ${totalRegistros}<br>
+         Pagos: ${totalPago} | Não Pagos: ${totalNaoPago}<br>
+         Valor Total do Dia: R$ ${somaValores.toFixed(2)}`;
+}
+
 document.getElementById('cadastroForm').addEventListener('submit', function(event){
     event.preventDefault();
 
-    const empresa = document.getElementById('empresa').value;
-    const fornecedor = document.getElementById('fornecedor').value;
-    const material = document.getElementById('material').value;
-    const quantidade = parseFloat(document.getElementById('quantidade').value);
+    const servico = document.getElementById('servico').value;
+    const assinatura = document.getElementById('assinatura').value;
     const preco = parseFloat(document.getElementById('preco').value).toFixed(2);
-    const total = (quantidade * preco).toFixed(2);
     const status = document.getElementById('status').value;
+    const data = new Date().toLocaleDateString('pt-BR');
 
-    // Data automática
-    const data = new Date();
-    const dataFormatada = data.toLocaleDateString('pt-BR');
-
-    const tabela = document.getElementById('tabelaFornecimentos').getElementsByTagName('tbody')[0];
+    const tabela = document.getElementById('tabelaServicos').querySelector('tbody');
     const novaLinha = tabela.insertRow();
 
-    novaLinha.insertCell(0).innerHTML = empresa;
-    novaLinha.insertCell(1).innerHTML = fornecedor;
-    novaLinha.insertCell(2).innerHTML = material;
-    novaLinha.insertCell(3).innerHTML = quantidade;
-    novaLinha.insertCell(4).innerHTML = `R$ ${preco}`;
-    novaLinha.insertCell(5).innerHTML = `R$ ${total}`;
-    novaLinha.insertCell(6).innerHTML = dataFormatada;
+    novaLinha.insertCell(0).appendChild(criarCelulaEditavel(servico));
+    novaLinha.insertCell(1).appendChild(criarCelulaEditavel(assinatura));
+    novaLinha.insertCell(2).appendChild(criarCelulaEditavel(preco, "number"));
+    novaLinha.insertCell(3).innerText = data;
 
-    // Status editável
-    const statusCell = novaLinha.insertCell(7);
+    // Status
+    const statusCell = novaLinha.insertCell(4);
     const selectStatus = document.createElement('select');
     selectStatus.className = 'statusSelect';
-    ['Pago','Não Pago'].forEach(op => {
+    ['Pago','Não Pago'].forEach(op=>{
         const option = document.createElement('option');
-        option.value = op;
-        option.text = op;
-        if(op === status) option.selected = true;
+        option.value = op; option.text = op;
+        if(op===status) option.selected = true;
         selectStatus.appendChild(option);
     });
+    atualizarCorStatus(selectStatus);
     statusCell.appendChild(selectStatus);
 
+    // Botão excluir
+    const acaoCell = novaLinha.insertCell(5);
+    const botaoExcluir = document.createElement('button');
+    botaoExcluir.innerText = "Eliminar"; botaoExcluir.className = "deleteBtn";
+    botaoExcluir.disabled = selectStatus.value !== "Pago";
+    botaoExcluir.addEventListener('click', ()=>{
+        novaLinha.remove();
+        atualizarRelatorio();
+    });
+    acaoCell.appendChild(botaoExcluir);
+
+    // Atualizações
+    function atualizarTudo(){
+        atualizarCorStatus(selectStatus);
+        botaoExcluir.disabled = selectStatus.value !== "Pago";
+        atualizarRelatorio();
+    }
+    [selectStatus,
+     novaLinha.cells[2].querySelector('input'),
+     novaLinha.cells[1].querySelector('input'),
+     novaLinha.cells[0].querySelector('input')
+    ].forEach(el=>el.addEventListener('input', atualizarTudo));
+    selectStatus.addEventListener('change', atualizarTudo);
+
     document.getElementById('cadastroForm').reset();
+    atualizarRelatorio();
 });
 </script>
 

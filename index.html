@@ -3,221 +3,293 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cadastro de Serviços</title>
+<title>Controlo das Dividas — Relatórios</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
 <style>
-    body {
-        font-family: Arial; margin: 20px;
-        background-color: #f4f4f4; display: flex; justify-content: center;
-    }
-    .container {
-        background-color: #fff; padding: 20px; border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 750px;
-    }
+    body { font-family: Arial; margin: 20px; background-color: #f4f4f4; display: flex; justify-content: center; }
+    .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 980px; }
     h1, h2 { text-align: center; color: #333; }
-    form {
-        margin-bottom: 20px; display: grid;
-        grid-template-columns: 1fr 1fr; gap: 10px 15px;
-    }
+    form { margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
     form div { display: flex; flex-direction: column; }
     label { margin-bottom: 3px; font-weight: bold; font-size: 14px; }
-    input, select {
-        width: 100%; padding: 5px; border: 1px solid #ccc;
-        border-radius: 4px; text-align: center; font-size: 14px;
-    }
+    input, select { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
     .full-width { grid-column: 1 / 3; }
-    button {
-        background-color: #28a745; color: white; padding: 6px 10px;
-        border: none; border-radius: 4px; cursor: pointer;
-        font-size: 14px; grid-column: 1 / 3; justify-self: center;
-    }
+    button { background-color: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; grid-column: 1 / 3; justify-self: center; }
     button:hover { background-color: #218838; }
-    table {
-        width: 100%; border-collapse: collapse;
-        margin-top: 15px; text-align: left; font-size: 14px;
-    }
-    th, td { border: 1px solid #ddd; padding: 6px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
     th { background-color: #f2f2f2; }
     tbody tr:nth-child(odd) { background-color: #f9f9f9; }
-    select.statusSelect {
-        width: 100%; border: none; background-color: transparent;
-        text-align: center; font-weight: bold;
-    }
-    button.deleteBtn {
-        background-color: #dc3545; color: white; padding: 4px 8px;
-        border-radius: 4px; border: none; cursor: pointer; font-size: 13px;
-    }
+    select.statusSelect { width: 100%; border: none; background-color: transparent; text-align: center; font-weight: bold; }
+    button.deleteBtn { background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; border: none; cursor: pointer; }
     button.deleteBtn:hover { background-color: #c82333; }
-    .relatorio {
-        margin-top: 20px; background: #f2f2f2;
-        padding: 10px; border-radius: 6px; font-size: 15px;
-    }
-    .pdf-btn {
-        background-color: #007bff; margin-top: 15px;
-    }
-    .pdf-btn:hover { background-color: #0069d9; }
+    .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .report { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+    .report h3 { margin-top: 0; }
+    .summary { display: flex; gap: 15px; flex-wrap: wrap; }
+    .summary .card { padding: 8px 12px; border-radius: 6px; background: white; box-shadow: 0 0 6px rgba(0,0,0,0.05); }
+    .actions-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+    .hint { font-size: 13px; color: #666; }
 </style>
-<!-- Biblioteca para gerar PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
 <div class="container">
-    <h1>Cadastro de Serviços</h1>
+    <h1>Controlo das Dividas Muipeliua</h1>
     <form id="cadastroForm">
-        <div><label>Tipo de Serviço:</label><input type="text" id="servico" required></div>
-        <div><label>Assinatura:</label><input type="text" id="assinatura" required></div>
-        <div><label>Preço (R$):</label><input type="number" id="preco" step="0.01" required></div>
-        <div><label>Status:</label>
-            <select id="status" required>
-                <option value="">Selecione</option>
-                <option value="Pago">Pago</option>
-                <option value="Não Pago">Não Pago</option>
-            </select>
-        </div>
+        <div><label>Nome de Beneficiario:</label><input type="text" id="empresa" required></div>
+        <div><label>Proprietario:</label><input type="text" id="fornecedor" required></div>
+        <div><label>Material Fornecido:</label><input type="text" id="material" required></div>
+        <div><label>Quantidade:</label><input type="number" id="quantidade" required></div>
+        <div><label>Preço Unitário (R$):</label><input type="number" id="preco" step="0.01" required></div>
+        <div><label>Status:</label><select id="status" required><option value="">Selecione</option><option value="Pago">Pago</option><option value="Não Pago">Não Pago</option></select></div>
         <button type="submit" class="full-width">Cadastrar</button>
     </form>
 
-    <h2>Registros Cadastrados</h2>
-    <table id="tabelaServicos">
+    <h2>Fornecimentos Cadastrados</h2>
+
+    <div class="controls">
+        <label for="filterType">Tipo de Relatório:</label>
+        <select id="filterType">
+            <option value="diario">Diário</option>
+            <option value="mensal">Mensal</option>
+            <option value="periodo">Período</option>
+            <option value="todos">Todos</option>
+        </select>
+
+        <input type="date" id="dateInput">
+        <input type="month" id="monthInput" style="display:none;">
+        <input type="date" id="fromDate" style="display:none;">
+        <input type="date" id="toDate" style="display:none;">
+
+        <button id="gerarRelatorioBtn">Gerar Relatório</button>
+        <div style="flex:1"></div>
+        <button id="baixarPdfBtn">Baixar PDF</button>
+    </div>
+
+    <table id="tabelaFornecimentos">
         <thead>
             <tr>
-                <th>Serviço</th><th>Assinatura</th>
-                <th>Preço</th><th>Data</th><th>Status</th><th>Ações</th>
+                <th>Beneficiario</th><th>Proprietario</th><th>Material</th><th>Quantidade</th>
+                <th>Preço Unitário</th><th>Preço Total</th><th>Data</th><th>Status</th><th>Ações</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 
-    <div id="relatorioDiario" class="relatorio">
-        <!-- Relatório diário aparecerá aqui -->
+    <div id="reportArea" class="report" style="display:none;">
+        <h3>Relatório</h3>
+        <div id="reportSummary" class="summary"></div>
+        <div id="reportTableContainer"></div>
+        <div class="actions-row"><span class="hint">Dica: pode editar quantidade, preço ou status diretamente na tabela antes de gerar/baixar o PDF.</span></div>
     </div>
-    <button id="btnPDF" class="pdf-btn full-width">Baixar Relatório em PDF</button>
 </div>
 
+<!-- html2pdf bundle (jsPDF + html2canvas) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 <script>
+// Guarda todos os fornecimentos numa lista para facilitar filtros e persistência
+let fornecimentos = JSON.parse(localStorage.getItem('fornecimentos_v1') || '[]');
+
+function salvarLocal(){
+    localStorage.setItem('fornecimentos_v1', JSON.stringify(fornecimentos));
+}
+
 function atualizarCorStatus(select){
-    if(select.value === "Pago"){ select.style.color = "green"; }
-    else if(select.value === "Não Pago"){ select.style.color = "red"; }
-    else { select.style.color = "black"; }
+    if(select.value === "Pago"){
+        select.style.color = "green";
+    } else if(select.value === "Não Pago"){
+        select.style.color = "red";
+    } else {
+        select.style.color = "black";
+    }
 }
 
 function criarCelulaEditavel(text, tipo="text"){
     const input = document.createElement("input");
-    input.value = text; input.type = tipo;
-    input.style.textAlign = "center"; input.style.width = "95%";
+    input.value = text;
+    input.type = tipo;
+    input.style.textAlign = "center";
     return input;
 }
 
-function atualizarRelatorio(){
-    const hoje = new Date().toLocaleDateString('pt-BR');
-    const linhas = document.querySelectorAll("#tabelaServicos tbody tr");
-    let totalRegistros = 0, totalPago = 0, totalNaoPago = 0, somaPago = 0, somaNaoPago = 0;
+function renderTable(list){
+    const tbody = document.getElementById('tabelaFornecimentos').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
 
-    linhas.forEach(linha=>{
-        const data = linha.cells[3].innerText;
-        if(data === hoje){
-            totalRegistros++;
-            const preco = parseFloat(linha.cells[2].querySelector('input').value) || 0;
-            const status = linha.cells[4].querySelector('select').value;
-            if(status==="Pago"){ totalPago++; somaPago += preco; }
-            else if(status==="Não Pago"){ totalNaoPago++; somaNaoPago += preco; }
-        }
+    list.forEach((item, index) => {
+        const novaLinha = tbody.insertRow();
+        // Beneficiario
+        const c0 = novaLinha.insertCell(0); c0.appendChild(criarCelulaEditavel(item.empresa));
+        const c1 = novaLinha.insertCell(1); c1.appendChild(criarCelulaEditavel(item.fornecedor));
+        const c2 = novaLinha.insertCell(2); c2.appendChild(criarCelulaEditavel(item.material));
+        const c3 = novaLinha.insertCell(3); c3.appendChild(criarCelulaEditavel(item.quantidade, "number"));
+        const c4 = novaLinha.insertCell(4); c4.appendChild(criarCelulaEditavel(item.preco.toFixed(2), "number"));
+        const c5 = novaLinha.insertCell(5); c5.innerText = `R$ ${(item.quantidade * item.preco).toFixed(2)}`;
+        const c6 = novaLinha.insertCell(6); c6.innerText = new Date(item.data).toLocaleDateString('pt-BR');
+
+        // Status
+        const statusCell = novaLinha.insertCell(7);
+        const selectStatus = document.createElement('select'); selectStatus.className = 'statusSelect';
+        ['Pago','Não Pago'].forEach(op => { const option = document.createElement('option'); option.value = op; option.text = op; if(op === item.status) option.selected = true; selectStatus.appendChild(option); });
+        atualizarCorStatus(selectStatus);
+        statusCell.appendChild(selectStatus);
+
+        // Ações
+        const acaoCell = novaLinha.insertCell(8);
+        const botaoExcluir = document.createElement('button'); botaoExcluir.innerText = "Eliminar"; botaoExcluir.className = "deleteBtn";
+        botaoExcluir.disabled = item.status !== "Pago";
+        botaoExcluir.addEventListener('click', ()=>{
+            if(confirm('Eliminar este registro?')){
+                fornecimentos.splice(index,1);
+                salvarLocal();
+                renderTable(fornecimentos);
+            }
+        });
+        acaoCell.appendChild(botaoExcluir);
+
+        // Quando usuário altera inputs na tabela, atualizamos o array
+        const inputs = [c0.firstChild, c1.firstChild, c2.firstChild, c3.firstChild, c4.firstChild];
+        inputs.forEach((inp, i) => {
+            inp.addEventListener('change', ()=>{
+                const val = (i===3||i===4) ? parseFloat(inp.value)||0 : inp.value;
+                if(i===0) fornecimentos[index].empresa = val;
+                if(i===1) fornecimentos[index].fornecedor = val;
+                if(i===2) fornecimentos[index].material = val;
+                if(i===3) fornecimentos[index].quantidade = val;
+                if(i===4) fornecimentos[index].preco = val;
+                c5.innerText = `R$ ${(fornecimentos[index].quantidade * fornecimentos[index].preco).toFixed(2)}`;
+                salvarLocal();
+            });
+        });
+
+        selectStatus.addEventListener('change', ()=>{
+            fornecimentos[index].status = selectStatus.value;
+            atualizarCorStatus(selectStatus);
+            botaoExcluir.disabled = selectStatus.value !== "Pago";
+            salvarLocal();
+        });
     });
-
-    const relatorioTexto = `
-        <b>Relatório Detalhado de ${hoje}</b><br><br>
-        No dia <b>${hoje}</b>, a Papelaria Muipeliua registou um total de <b>${totalRegistros}</b> serviços.
-        Dentre estes, <b>${totalPago}</b> foram marcados como <span style="color:green">PAGO</span>,
-        totalizando um valor recebido de <b>R$ ${somaPago.toFixed(2)}</b>.
-        Por outro lado, <b>${totalNaoPago}</b> serviços permanecem com o status de
-        <span style="color:red">NÃO PAGO</span>, somando um valor pendente de <b>R$ ${somaNaoPago.toFixed(2)}</b>.
-        Este relatório demonstra a movimentação financeira do dia e serve para acompanhamento administrativo.
-    `;
-
-    document.getElementById("relatorioDiario").innerHTML = relatorioTexto;
 }
 
+// Inicial render
+renderTable(fornecimentos);
+
+// Form submission
 document.getElementById('cadastroForm').addEventListener('submit', function(event){
     event.preventDefault();
-
-    const servico = document.getElementById('servico').value;
-    const assinatura = document.getElementById('assinatura').value;
-    const preco = parseFloat(document.getElementById('preco').value).toFixed(2);
+    const empresa = document.getElementById('empresa').value;
+    const fornecedor = document.getElementById('fornecedor').value;
+    const material = document.getElementById('material').value;
+    const quantidade = parseFloat(document.getElementById('quantidade').value) || 0;
+    const preco = parseFloat(document.getElementById('preco').value) || 0;
     const status = document.getElementById('status').value;
-    const data = new Date().toLocaleDateString('pt-BR');
+    const data = new Date().toISOString();
 
-    const tabela = document.getElementById('tabelaServicos').querySelector('tbody');
-    const novaLinha = tabela.insertRow();
-
-    novaLinha.insertCell(0).appendChild(criarCelulaEditavel(servico));
-    novaLinha.insertCell(1).appendChild(criarCelulaEditavel(assinatura));
-    novaLinha.insertCell(2).appendChild(criarCelulaEditavel(preco, "number"));
-    novaLinha.insertCell(3).innerText = data;
-
-    // Status
-    const statusCell = novaLinha.insertCell(4);
-    const selectStatus = document.createElement('select');
-    selectStatus.className = 'statusSelect';
-    ['Pago','Não Pago'].forEach(op=>{
-        const option = document.createElement('option');
-        option.value = op; option.text = op;
-        if(op===status) option.selected = true;
-        selectStatus.appendChild(option);
-    });
-    atualizarCorStatus(selectStatus);
-    statusCell.appendChild(selectStatus);
-
-    // Botão excluir
-    const acaoCell = novaLinha.insertCell(5);
-    const botaoExcluir = document.createElement('button');
-    botaoExcluir.innerText = "Eliminar"; botaoExcluir.className = "deleteBtn";
-    botaoExcluir.disabled = selectStatus.value !== "Pago";
-    botaoExcluir.addEventListener('click', ()=>{
-        novaLinha.remove();
-        atualizarRelatorio();
-    });
-    acaoCell.appendChild(botaoExcluir);
-
-    function atualizarTudo(){
-        atualizarCorStatus(selectStatus);
-        botaoExcluir.disabled = selectStatus.value !== "Pago";
-        atualizarRelatorio();
-    }
-    [selectStatus,
-     novaLinha.cells[2].querySelector('input'),
-     novaLinha.cells[1].querySelector('input'),
-     novaLinha.cells[0].querySelector('input')
-    ].forEach(el=>el.addEventListener('input', atualizarTudo));
-    selectStatus.addEventListener('change', atualizarTudo);
-
+    const novo = { empresa, fornecedor, material, quantidade, preco, status, data };
+    fornecimentos.push(novo);
+    salvarLocal();
+    renderTable(fornecimentos);
     document.getElementById('cadastroForm').reset();
-    atualizarRelatorio();
 });
 
-// 🔹 Botão para gerar PDF
-document.getElementById("btnPDF").addEventListener("click", ()=>{
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const hoje = new Date().toLocaleDateString('pt-BR');
+// Controle de inputs de filtro
+const filterType = document.getElementById('filterType');
+const dateInput = document.getElementById('dateInput');
+const monthInput = document.getElementById('monthInput');
+const fromDate = document.getElementById('fromDate');
+const toDate = document.getElementById('toDate');
 
-    // Cabeçalho Oficial
-    doc.setFont("times", "bold");
-    doc.setFontSize(14);
-    doc.text("REPÚBLICA DE MOÇAMBIQUE", 105, 20, null, null, "center");
-    doc.text("Papelaria Muipeliua", 105, 28, null, null, "center");
-    doc.text(`Relatório Mensal - ${hoje}`, 105, 36, null, null, "center");
-    doc.line(20, 40, 190, 40);
-
-    // Corpo do Relatório
-    const textoRelatorio = document.getElementById("relatorioDiario").innerText;
-    doc.setFont("times", "normal");
-    doc.setFontSize(14);
-    doc.setLineHeightFactor(1.5);
-    doc.text(textoRelatorio, 20, 50, { maxWidth: 170, align: "justify" });
-
-    doc.save(`Relatorio_Papelaria_${hoje}.pdf`);
+filterType.addEventListener('change', ()=>{
+    const v = filterType.value;
+    dateInput.style.display = (v==='diario') ? 'inline-block' : 'none';
+    monthInput.style.display = (v==='mensal') ? 'inline-block' : 'none';
+    fromDate.style.display = (v==='periodo') ? 'inline-block' : 'none';
+    toDate.style.display = (v==='periodo') ? 'inline-block' : 'none';
 });
+
+function filtrarFornecimentos(){
+    const tipo = filterType.value;
+    if(tipo === 'todos') return fornecimentos.slice();
+    if(tipo === 'diario' && dateInput.value){
+        const d = new Date(dateInput.value);
+        return fornecimentos.filter(f => {
+            const fd = new Date(f.data);
+            return fd.getFullYear()===d.getFullYear() && fd.getMonth()===d.getMonth() && fd.getDate()===d.getDate();
+        });
+    }
+    if(tipo === 'mensal' && monthInput.value){
+        const [year, month] = monthInput.value.split('-').map(Number);
+        return fornecimentos.filter(f => { const fd = new Date(f.data); return fd.getFullYear()===year && (fd.getMonth()+1)===month; });
+    }
+    if(tipo === 'periodo' && fromDate.value && toDate.value){
+        const from = new Date(fromDate.value);
+        const to = new Date(toDate.value); to.setHours(23,59,59,999);
+        return fornecimentos.filter(f => { const fd = new Date(f.data); return fd>=from && fd<=to; });
+    }
+    return [];
+}
+
+function gerarResumo(list){
+    const totalGeral = list.reduce((s, r) => s + (r.quantidade * r.preco), 0);
+    const totalPago = list.filter(r=>r.status==='Pago').reduce((s,r)=> s+(r.quantidade*r.preco),0);
+    const totalNaoPago = list.filter(r=>r.status==='Não Pago').reduce((s,r)=> s+(r.quantidade*r.preco),0);
+    const count = list.length;
+    return { totalGeral, totalPago, totalNaoPago, count };
+}
+
+function gerarRelatorio(){
+    const filtrados = filtrarFornecimentos();
+    const reportArea = document.getElementById('reportArea');
+    const summaryDiv = document.getElementById('reportSummary');
+    const tableContainer = document.getElementById('reportTableContainer');
+
+    reportArea.style.display = 'block';
+    summaryDiv.innerHTML = '';
+    const resumo = gerarResumo(filtrados);
+
+    const cards = [
+        {title: 'Registos', value: resumo.count},
+        {title: 'Total (R$)', value: resumo.totalGeral.toFixed(2)},
+        {title: 'Pago (R$)', value: resumo.totalPago.toFixed(2)},
+        {title: 'Não Pago (R$)', value: resumo.totalNaoPago.toFixed(2)}
+    ];
+    cards.forEach(c=>{ const div = document.createElement('div'); div.className='card'; div.innerHTML = `<strong>${c.title}</strong><div>${c.value}</div>`; summaryDiv.appendChild(div); });
+
+    // tabela resumo dentro do relatorio
+    let html = '<table style="width:100%; border-collapse:collapse; margin-top:10px;"><thead><tr><th>Beneficiario</th><th>Proprietario</th><th>Material</th><th>Quantidade</th><th>Preço Unit.</th><th>Preço Total</th><th>Data</th><th>Status</th></tr></thead><tbody>';
+    filtrados.forEach(r=>{
+        html += `<tr><td>${escapeHtml(r.empresa)}</td><td>${escapeHtml(r.fornecedor)}</td><td>${escapeHtml(r.material)}</td><td style="text-align:center">${r.quantidade}</td><td style="text-align:center">R$ ${r.preco.toFixed(2)}</td><td style="text-align:center">R$ ${(r.quantidade*r.preco).toFixed(2)}</td><td style="text-align:center">${new Date(r.data).toLocaleDateString('pt-BR')}</td><td style="text-align:center">${r.status}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    tableContainer.innerHTML = html;
+}
+
+function escapeHtml(text){
+    if(!text) return '';
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('gerarRelatorioBtn').addEventListener('click', (e)=>{ e.preventDefault(); gerarRelatorio(); });
+
+// Baixar PDF do conteúdo do reportArea
+document.getElementById('baixarPdfBtn').addEventListener('click', (e)=>{
+    e.preventDefault();
+    const reportArea = document.getElementById('reportArea');
+    if(reportArea.style.display === 'none'){ alert('Gere um relatório primeiro.'); return; }
+    // configurações do html2pdf
+    const opt = {
+        margin:       0.4,
+        filename:     `relatorio_dividas_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    // adiciona um título temporário ao reporte
+    const titulo = document.createElement('h2'); titulo.innerText = 'Relatório — Controlo das Dívidas'; reportArea.insertBefore(titulo, reportArea.firstChild);
+    html2pdf().set(opt).from(reportArea).save().then(()=>{ titulo.remove(); });
+});
+
 </script>
-
 </body>
 </html>

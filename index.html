@@ -1,29 +1,112 @@
-...
-<thead>
-  <tr>
-    <th>Data</th>
-    <th>Fornecedor</th>
-    <th>Beneficiário</th>
-    <th>Material</th>
-    <th>Quantidade</th>
-    <th>Preço Unitário</th>
-    <th>Preço Total</th>
-    <th>Status</th>
-    <th>Ações</th>
-    <th>Excluir</th> <!-- ✅ NOVA COLUNA -->
-  </tr>
-</thead>
-<tbody id="tabelaFornecimentos"></tbody>
-...
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Controlo de Fornecimentos</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    form { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px; max-width: 800px; margin-left:auto; margin-right:auto; }
+    label { display:block; margin-top:10px; font-weight:bold; }
+    input, select { width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:5px; }
+    button { background:#007bff; color:#fff; border:none; padding:10px 15px; border-radius:5px; margin-top:15px; cursor:pointer; }
+    button:hover { background:#0056b3; }
+    table { width:100%; border-collapse: collapse; max-width:1000px; margin:0 auto; background:#fff; }
+    th, td { border:1px solid #ddd; padding:10px; text-align:center; }
+    th { background:#007bff; color:#fff; }
+    tbody tr:nth-child(even){ background:#f2f2f2; }
+    #gerarPDF, #carregarNaoPagos { background:#6f42c1; display:block; margin:15px auto; }
+    #gerarPDF:hover, #carregarNaoPagos:hover { background:#55309e; }
+    #filtros { text-align:center; margin:25px auto; background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); max-width:800px; }
+    #filtros label { margin:0 15px; }
+    .btnPago { background:#28a745; color:#fff; padding:5px 10px; border:none; border-radius:4px; cursor:pointer; }
+    .btnPago:hover { background:#1e7e34; }
+  </style>
+</head>
+<body>
+<h1>Controlo de Fornecimentos</h1>
+
+<form id="formFornecimento">
+  <label>Fornecedor:</label>
+  <input type="text" id="fornecedor" required>
+
+  <label>Beneficiário:</label>
+  <input type="text" id="beneficiario" required>
+
+  <label>Material:</label>
+  <input type="text" id="material" required>
+
+  <label>Quantidade:</label>
+  <input type="number" id="quantidade" min="1" required>
+
+  <label>Preço Unitário:</label>
+  <input type="number" id="precoUnitario" step="0.01" min="0" required>
+
+  <label>Status:</label>
+  <select id="status" required>
+    <option value="">--Selecione--</option>
+    <option value="Não Pago">Não Pago</option>
+    <option value="Pago">Pago</option>
+    <option value="Cancelado">Cancelado</option>
+  </select>
+
+  <button type="submit">Adicionar Fornecimento</button>
+</form>
+
+<button id="carregarNaoPagos">💰 Carregar Não Pagos</button>
+<button id="gerarPDF">📄 Gerar Relatório PDF</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Fornecedor</th>
+      <th>Beneficiário</th>
+      <th>Material</th>
+      <th>Quantidade</th>
+      <th>Preço Unitário</th>
+      <th>Preço Total</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody id="tabelaFornecimentos"></tbody>
+</table>
+
+<div id="filtros">
+  <label>De: <input type="date" id="dataInicio"></label>
+  <label>Até: <input type="date" id="dataFim"></label>
+  <label>Status:
+    <select id="filtroStatus">
+      <option value="">Todos</option>
+      <option value="Não Pago">Não Pago</option>
+      <option value="Pago">Pago</option>
+      <option value="Cancelado">Cancelado</option>
+    </select>
+  </label>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
+const form = document.getElementById('formFornecimento');
+const tabela = document.getElementById('tabelaFornecimentos');
+const gerarPDFbtn = document.getElementById('gerarPDF');
+const carregarNaoPagosBtn = document.getElementById('carregarNaoPagos');
+
+let fornecimentos = JSON.parse(localStorage.getItem('fornecimentos')) || [];
+
 const scriptURL = "https://script.google.com/macros/s/AKfycbyKcseqLCZotkOGnA4dUYtPE0zIV-wVH5A_djirxld-_r4BB7el1ETakgzUdJt36_qx/exec";
+const dadosURL = "https://script.google.com/macros/s/AKfycbyKcseqLCZotkOGnA4dUYtPE0zIV-wVH5A_djirxld-_r4BB7el1ETakgzUdJt36_qx/exec";
 
 function atualizarTabela() {
   tabela.innerHTML = '';
   fornecimentos.forEach((item,index) => {
     const linha = document.createElement('tr');
+    // Exibir em formato DD/MM/AAAA mesmo salvando em YYYY-MM-DD
+    const dataFormatada = new Date(item.data).toLocaleDateString('pt-PT');
     linha.innerHTML = `
-      <td>${item.data}</td>
+      <td>${dataFormatada}</td>
       <td>${item.fornecedor}</td>
       <td>${item.beneficiario}</td>
       <td>${item.material}</td>
@@ -34,48 +117,126 @@ function atualizarTabela() {
       <td>${item.status==='Não Pago'
           ?'<button class="btnPago" data-index="'+index+'">Marcar Pago</button>'
           :''}</td>
-      <td><button class="btnExcluir" data-index="${index}">🗑️ Excluir</button></td>
     `;
     tabela.appendChild(linha);
   });
 
-  // Botões "Marcar Pago"
+  // Evento para "Marcar Pago"
   document.querySelectorAll('.btnPago').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
-      const idx = btn.dataset.index;
+      const idx = btn.getAttribute('data-index');
       fornecimentos[idx].status = 'Pago';
       localStorage.setItem('fornecimentos', JSON.stringify(fornecimentos));
       atualizarTabela();
-      fetch(scriptURL, {method:"POST", body:JSON.stringify(fornecimentos[idx])});
-    });
-  });
-
-  // ✅ Botões "Excluir"
-  document.querySelectorAll('.btnExcluir').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      if(!confirm("Deseja realmente excluir este registro?")) return;
-      const idx = btn.dataset.index;
-      const item = fornecimentos[idx];
-
-      try {
-        const res = await fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify({ action: "delete", item })
-        });
-        const result = await res.json();
-        if (result.success) {
-          fornecimentos.splice(idx,1);
-          localStorage.setItem('fornecimentos', JSON.stringify(fornecimentos));
-          atualizarTabela();
-          alert("Registro excluído com sucesso!");
-        } else {
-          alert("Falha ao excluir no Google Sheets.");
-        }
-      } catch(err) {
-        console.error(err);
-        alert("Erro de conexão ao excluir.");
-      }
+      // Atualiza no Google Sheets
+      fetch(scriptURL, {
+        method:"POST",
+        body:JSON.stringify(fornecimentos[idx])
+      }).then(res=>console.log('Atualizado no Google Sheets'))
+        .catch(err=>console.error(err));
     });
   });
 }
+
+form.addEventListener('submit', function(event){
+  event.preventDefault();
+  const fornecedor = document.getElementById('fornecedor').value;
+  const beneficiario = document.getElementById('beneficiario').value;
+  const material = document.getElementById('material').value;
+  const quantidade = parseFloat(document.getElementById('quantidade').value);
+  const precoUnitario = parseFloat(document.getElementById('precoUnitario').value);
+  const status = document.getElementById('status').value;
+
+  const precoTotal = (quantidade*precoUnitario).toFixed(2);
+  // ✅ Salva a data em formato ISO (YYYY-MM-DD)
+  const hoje = new Date();
+  const data = hoje.toISOString().split('T')[0];
+  const novo = { fornecedor, beneficiario, material, quantidade, precoUnitario, precoTotal, status, data };
+
+  fornecimentos.push(novo);
+  localStorage.setItem('fornecimentos', JSON.stringify(fornecimentos));
+  atualizarTabela();
+  form.reset();
+
+  fetch(scriptURL,{
+    method:"POST",
+    body:JSON.stringify(novo)
+  }).then(res=>console.log("Enviado para Google Sheets"))
+    .catch(err=>console.error(err));
+});
+
+// Carregar registros Não Pagos
+carregarNaoPagosBtn.addEventListener('click', async ()=>{
+  try{
+    const res = await fetch(dadosURL);
+    const lista = await res.json();
+    fornecimentos = lista.filter(item=>item.status==='Não Pago');
+    localStorage.setItem('fornecimentos', JSON.stringify(fornecimentos));
+    atualizarTabela();
+  }catch(err){
+    console.error(err);
+    alert('Erro ao carregar os registros Não Pagos.');
+  }
+});
+
+// Gerar PDF com filtro corrigido
+gerarPDFbtn.addEventListener('click', async () => {
+  try {
+    const res = await fetch(dadosURL);
+    const lista = await res.json();
+    const dataInicio = document.getElementById('dataInicio').value;
+    const dataFim = document.getElementById('dataFim').value;
+    const filtroStatus = document.getElementById('filtroStatus').value;
+
+    const filtrados = lista.filter(item => {
+      let passa = true;
+      const dataItem = new Date(item.data + "T00:00:00");
+      if (dataInicio) {
+        const inicio = new Date(dataInicio + "T00:00:00");
+        if (dataItem < inicio) passa = false;
+      }
+      if (dataFim) {
+        const fim = new Date(dataFim + "T23:59:59");
+        if (dataItem > fim) passa = false;
+      }
+      if (filtroStatus && item.status !== filtroStatus) passa = false;
+      return passa;
+    });
+
+    if(filtrados.length===0){
+      alert('Não há registros que correspondam aos filtros.');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"landscape" });
+    doc.setFontSize(14);
+    doc.text("Relatório de Fornecimentos",14,15);
+
+    const cabecalho = ["Data","Fornecedor","Beneficiário","Material","Qtd","Preço Unit","Total","Status"];
+    const linhas = filtrados.map(item=>[
+      new Date(item.data).toLocaleDateString('pt-PT'),
+      item.fornecedor,item.beneficiario,item.material,
+      item.quantidade,item.precoUnitario,item.precoTotal,item.status
+    ]);
+    const totalGeral = filtrados.reduce((soma,item)=>soma+parseFloat(item.precoTotal),0).toFixed(2);
+
+    doc.autoTable({
+      head:[cabecalho],
+      body:linhas,
+      startY:25,
+      styles:{fontSize:8},
+      foot:[['','','','','','Total Geral',totalGeral+' MT','']]
+    });
+
+    doc.save("Relatorio_Fornecimentos.pdf");
+  } catch(err) {
+    console.error(err);
+    alert('Erro ao gerar PDF.');
+  }
+});
+
+atualizarTabela();
 </script>
+</body>
+</html>

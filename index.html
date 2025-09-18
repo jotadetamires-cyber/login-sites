@@ -3,240 +3,284 @@
 <head>
   <meta charset="UTF-8">
   <title>Controlo de Fornecimentos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 20px;
+    }
     h1 { text-align: center; color: #333; }
-    form { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px; max-width: 800px; margin-left:auto; margin-right:auto; }
-    label { display:block; margin-top:10px; font-weight:bold; }
-    input, select { width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:5px; }
-    button { background:#007bff; color:#fff; border:none; padding:10px 15px; border-radius:5px; margin-top:15px; cursor:pointer; }
-    button:hover { background:#0056b3; }
-    table { width:100%; border-collapse: collapse; max-width:1000px; margin:0 auto; background:#fff; }
-    th, td { border:1px solid #ddd; padding:10px; text-align:center; }
-    th { background:#007bff; color:#fff; }
-    tbody tr:nth-child(even){ background:#f2f2f2; }
-    #gerarPDF, #carregarNaoPagos { background:#6f42c1; display:block; margin:15px auto; }
-    #gerarPDF:hover, #carregarNaoPagos:hover { background:#55309e; }
-    #filtros { text-align:center; margin:25px auto; background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); max-width:800px; }
-    #filtros label { margin:0 15px; }
-    .btnPago { background:#28a745; color:#fff; padding:5px 10px; border:none; border-radius:4px; cursor:pointer; }
-    .btnPago:hover { background:#1e7e34; }
+    form, .filtros {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    label { display: block; margin-top: 10px; }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th { background: #007bff; color: #fff; }
+    .btnPago {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btnPago:hover { background: #218838; }
+    .acoes { text-align: center; margin-top: 20px; }
+    .acoes button {
+      width: auto;
+      margin: 5px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    .acoes button:hover { background: #0056b3; }
   </style>
 </head>
 <body>
-<h1>Controlo de Fornecimentos</h1>
 
-<form id="formFornecimento">
-  <label>Fornecedor:</label>
-  <input type="text" id="fornecedor" required>
+  <h1>📊 Controlo de Fornecimentos</h1>
 
-  <label>Beneficiário:</label>
-  <input type="text" id="beneficiario" required>
+  <!-- Formulário de cadastro -->
+  <form id="formFornecimento">
+    <label>Fornecedor: <input type="text" id="fornecedor" required></label>
+    <label>Beneficiário: <input type="text" id="beneficiario" required></label>
+    <label>Material: <input type="text" id="material" required></label>
+    <label>Quantidade: <input type="number" id="quantidade" step="0.01" required></label>
+    <label>Preço Unitário (MT): <input type="number" id="precoUnitario" step="0.01" required></label>
+    <label>Status:
+      <select id="status" required>
+        <option value="Pago">Pago</option>
+        <option value="Não Pago">Não Pago</option>
+      </select>
+    </label>
+    <button type="submit">💾 Salvar</button>
+  </form>
 
-  <label>Material:</label>
-  <input type="text" id="material" required>
+  <!-- Filtros para relatório -->
+  <div class="filtros">
+    <h3>📑 Filtros para Relatório</h3>
+    <label>Data Início: <input type="date" id="dataInicio"></label>
+    <label>Data Fim: <input type="date" id="dataFim"></label>
+    <label>Status:
+      <select id="filtroStatus">
+        <option value="">Todos</option>
+        <option value="Pago">Pago</option>
+        <option value="Não Pago">Não Pago</option>
+      </select>
+    </label>
+    <div class="acoes">
+      <button id="gerarPDF">Gerar PDF</button>
+      <button id="carregarNaoPagos">Carregar Não Pagos</button>
+    </div>
+  </div>
 
-  <label>Quantidade:</label>
-  <input type="number" id="quantidade" min="1" required>
+  <!-- Tabela de dados -->
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Fornecedor</th>
+        <th>Beneficiário</th>
+        <th>Material</th>
+        <th>Qtd</th>
+        <th>Preço Unit</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaFornecimentos"></tbody>
+  </table>
 
-  <label>Preço Unitário:</label>
-  <input type="number" id="precoUnitario" step="0.01" min="0" required>
+  <!-- ===================== JAVASCRIPT ===================== -->
+  <script>
+    const form        = document.getElementById('formFornecimento');
+    const tabela      = document.getElementById('tabelaFornecimentos');
+    const gerarPDF    = document.getElementById('gerarPDF');
+    const btnNaoPagos = document.getElementById('carregarNaoPagos');
 
-  <label>Status:</label>
-  <select id="status" required>
-    <option value="">--Selecione--</option>
-    <option value="Não Pago">Não Pago</option>
-    <option value="Pago">Pago</option>
-    <option value="Cancelado">Cancelado</option>
-  </select>
+    let fornecimentos = JSON.parse(localStorage.getItem('fornecimentos')) || [];
 
-  <button type="submit">Adicionar Fornecimento</button>
-</form>
+    // 🚨 Substitua pela URL do seu Apps Script publicado
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyTdvKv5Y9FLbJ8eAliB6q4Xe1amtOb-kATjPig_5tYP1db1Xbv3oBH4IzOeizHUPMG/exec";
 
-<button id="carregarNaoPagos">💰 Carregar Não Pagos</button>
-<button id="gerarPDF">📄 Gerar Relatório PDF</button>
-
-<table>
-  <thead>
-    <tr>
-      <th>Data</th>
-      <th>Fornecedor</th>
-      <th>Beneficiário</th>
-      <th>Material</th>
-      <th>Quantidade</th>
-      <th>Preço Unitário</th>
-      <th>Preço Total</th>
-      <th>Status</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody id="tabelaFornecimentos"></tbody>
-</table>
-
-<div id="filtros">
-  <label>De: <input type="date" id="dataInicio"></label>
-  <label>Até: <input type="date" id="dataFim"></label>
-  <label>Status:
-    <select id="filtroStatus">
-      <option value="">Todos</option>
-      <option value="Não Pago">Não Pago</option>
-      <option value="Pago">Pago</option>
-      <option value="Cancelado">Cancelado</option>
-    </select>
-  </label>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script>
-const form = document.getElementById('formFornecimento');
-const tabela = document.getElementById('tabelaFornecimentos');
-const gerarPDFbtn = document.getElementById('gerarPDF');
-const carregarNaoPagosBtn = document.getElementById('carregarNaoPagos');
-
-let fornecimentos = JSON.parse(localStorage.getItem('fornecimentos')) || [];
-
-const scriptURL = "https://script.google.com/macros/s/AKfycbyKcseqLCZotkOGnA4dUYtPE0zIV-wVH5A_djirxld-_r4BB7el1ETakgzUdJt36_qx/exec";
-const dadosURL = "https://script.google.com/macros/s/AKfycbyKcseqLCZotkOGnA4dUYtPE0zIV-wVH5A_djirxld-_r4BB7el1ETakgzUdJt36_qx/exec";
-
-function atualizarTabela() {
-  tabela.innerHTML = '';
-  fornecimentos.forEach((item,index) => {
-    const linha = document.createElement('tr');
-    // Exibir em formato DD/MM/AAAA mesmo salvando em YYYY-MM-DD
-    const dataFormatada = new Date(item.data).toLocaleDateString('pt-PT');
-    linha.innerHTML = `
-      <td>${dataFormatada}</td>
-      <td>${item.fornecedor}</td>
-      <td>${item.beneficiario}</td>
-      <td>${item.material}</td>
-      <td>${item.quantidade}</td>
-      <td>${item.precoUnitario.toFixed(2)}</td>
-      <td>${item.precoTotal}</td>
-      <td>${item.status}</td>
-      <td>${item.status==='Não Pago'
-          ?'<button class="btnPago" data-index="'+index+'">Marcar Pago</button>'
-          :''}</td>
-    `;
-    tabela.appendChild(linha);
-  });
-
-  // Evento para "Marcar Pago"
-  document.querySelectorAll('.btnPago').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const idx = btn.getAttribute('data-index');
-      fornecimentos[idx].status = 'Pago';
+    function salvarLocal(){
       localStorage.setItem('fornecimentos', JSON.stringify(fornecimentos));
-      atualizarTabela();
-      // Atualiza no Google Sheets
-      fetch(scriptURL, {
-        method:"POST",
-        body:JSON.stringify(fornecimentos[idx])
-      }).then(res=>console.log('Atualizado no Google Sheets'))
-        .catch(err=>console.error(err));
-    });
-  });
-}
-
-form.addEventListener('submit', function(event){
-  event.preventDefault();
-  const fornecedor = document.getElementById('fornecedor').value;
-  const beneficiario = document.getElementById('beneficiario').value;
-  const material = document.getElementById('material').value;
-  const quantidade = parseFloat(document.getElementById('quantidade').value);
-  const precoUnitario = parseFloat(document.getElementById('precoUnitario').value);
-  const status = document.getElementById('status').value;
-
-  const precoTotal = (quantidade*precoUnitario).toFixed(2);
-  // ✅ Salva a data em formato ISO (YYYY-MM-DD)
-  const hoje = new Date();
-  const data = hoje.toISOString().split('T')[0];
-  const novo = { fornecedor, beneficiario, material, quantidade, precoUnitario, precoTotal, status, data };
-
-  fornecimentos.push(novo);
-  localStorage.setItem('fornecimentos', JSON.stringify(fornecimentos));
-  atualizarTabela();
-  form.reset();
-
-  fetch(scriptURL,{
-    method:"POST",
-    body:JSON.stringify(novo)
-  }).then(res=>console.log("Enviado para Google Sheets"))
-    .catch(err=>console.error(err));
-});
-
-// Carregar registros Não Pagos
-carregarNaoPagosBtn.addEventListener('click', async ()=>{
-  try{
-    const res = await fetch(dadosURL);
-    const lista = await res.json();
-    fornecimentos = lista.filter(item=>item.status==='Não Pago');
-    localStorage.setItem('fornecimentos', JSON.stringify(fornecimentos));
-    atualizarTabela();
-  }catch(err){
-    console.error(err);
-    alert('Erro ao carregar os registros Não Pagos.');
-  }
-});
-
-// Gerar PDF com filtro corrigido
-gerarPDFbtn.addEventListener('click', async () => {
-  try {
-    const res = await fetch(dadosURL);
-    const lista = await res.json();
-    const dataInicio = document.getElementById('dataInicio').value;
-    const dataFim = document.getElementById('dataFim').value;
-    const filtroStatus = document.getElementById('filtroStatus').value;
-
-    const filtrados = lista.filter(item => {
-      let passa = true;
-      const dataItem = new Date(item.data + "T00:00:00");
-      if (dataInicio) {
-        const inicio = new Date(dataInicio + "T00:00:00");
-        if (dataItem < inicio) passa = false;
-      }
-      if (dataFim) {
-        const fim = new Date(dataFim + "T23:59:59");
-        if (dataItem > fim) passa = false;
-      }
-      if (filtroStatus && item.status !== filtroStatus) passa = false;
-      return passa;
-    });
-
-    if(filtrados.length===0){
-      alert('Não há registros que correspondam aos filtros.');
-      return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation:"landscape" });
-    doc.setFontSize(14);
-    doc.text("Relatório de Fornecimentos",14,15);
+    function formatarDataISO(dataISO){
+      return new Date(dataISO).toLocaleDateString('pt-PT');
+    }
 
-    const cabecalho = ["Data","Fornecedor","Beneficiário","Material","Qtd","Preço Unit","Total","Status"];
-    const linhas = filtrados.map(item=>[
-      new Date(item.data).toLocaleDateString('pt-PT'),
-      item.fornecedor,item.beneficiario,item.material,
-      item.quantidade,item.precoUnitario,item.precoTotal,item.status
-    ]);
-    const totalGeral = filtrados.reduce((soma,item)=>soma+parseFloat(item.precoTotal),0).toFixed(2);
+    function parseData(str){
+      if (/^\\d{4}-\\d{2}-\\d{2}$/.test(str)) return new Date(str + "T00:00:00");
+      if (/^\\d{2}\\/\\d{2}\\/\\d{4}$/.test(str)){
+        const [d,m,a] = str.split('/');
+        return new Date(`${a}-${m}-${d}T00:00:00`);
+      }
+      return new Date(str);
+    }
 
-    doc.autoTable({
-      head:[cabecalho],
-      body:linhas,
-      startY:25,
-      styles:{fontSize:8},
-      foot:[['','','','','','Total Geral',totalGeral+' MT','']]
-    });
+    function atualizarTabela(){
+      tabela.innerHTML = '';
+      fornecimentos.forEach((item,idx)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${formatarDataISO(item.data)}</td>
+          <td>${item.fornecedor}</td>
+          <td>${item.beneficiario}</td>
+          <td>${item.material}</td>
+          <td>${item.quantidade}</td>
+          <td>${item.precoUnitario.toFixed(2)}</td>
+          <td>${item.precoTotal}</td>
+          <td>${item.status}</td>
+          <td>${item.status==='Não Pago'
+              ? `<button class="btnPago" data-idx="${idx}" data-row="${item.row||''}">Marcar Pago</button>`
+              : ''}</td>`;
+        tabela.appendChild(tr);
+      });
 
-    doc.save("Relatorio_Fornecimentos.pdf");
-  } catch(err) {
-    console.error(err);
-    alert('Erro ao gerar PDF.');
-  }
-});
+      document.querySelectorAll('.btnPago').forEach(btn=>{
+        btn.onclick = async ()=>{
+          const i    = btn.dataset.idx;
+          const linhaSheet = btn.dataset.row;
+          fornecimentos[i].status = 'Pago';
+          salvarLocal();
+          atualizarTabela();
 
-atualizarTabela();
-</script>
+          if(linhaSheet){
+            await fetch(scriptURL,{
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body: JSON.stringify({
+                action:"update",
+                row: linhaSheet,
+                status:"Pago"
+              })
+            });
+          } else {
+            await fetch(scriptURL,{
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body: JSON.stringify(fornecimentos[i])
+            });
+          }
+        };
+      });
+    }
+
+    form.onsubmit = e=>{
+      e.preventDefault();
+      const fornecedor   = document.getElementById('fornecedor').value;
+      const beneficiario = document.getElementById('beneficiario').value;
+      const material     = document.getElementById('material').value;
+      const quantidade   = parseFloat(document.getElementById('quantidade').value);
+      const precoUnit    = parseFloat(document.getElementById('precoUnitario').value);
+      const status       = document.getElementById('status').value;
+
+      const precoTotal = (quantidade * precoUnit).toFixed(2);
+      const data = new Date().toISOString().split('T')[0];
+
+      const novo = { fornecedor, beneficiario, material,
+                     quantidade, precoUnitario:precoUnit,
+                     precoTotal, status, data };
+
+      fornecimentos.push(novo);
+      salvarLocal();
+      atualizarTabela();
+      form.reset();
+
+      fetch(scriptURL,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(novo)
+      });
+    };
+
+    btnNaoPagos.onclick = async ()=>{
+      try{
+        const r = await fetch(scriptURL);
+        const lista = await r.json();
+        fornecimentos = lista.filter(x=>x.status === 'Não Pago');
+        salvarLocal();
+        atualizarTabela();
+      }catch(e){ alert('Erro ao carregar registros.'); console.error(e); }
+    };
+
+    gerarPDF.onclick = async ()=>{
+      try{
+        const r = await fetch(scriptURL);
+        const lista = await r.json();
+        const inicio = document.getElementById('dataInicio').value;
+        const fim    = document.getElementById('dataFim').value;
+        const fStatus= document.getElementById('filtroStatus').value;
+
+        const filtrados = lista.filter(item=>{
+          let ok = true;
+          const d = parseData(item.data);
+          if (inicio && d < new Date(inicio+"T00:00:00")) ok=false;
+          if (fim    && d > new Date(fim+"T23:59:59")) ok=false;
+          if (fStatus && item.status !== fStatus) ok=false;
+          return ok;
+        });
+
+        if (!filtrados.length){ alert('Nenhum registro no período.'); return; }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({orientation:'landscape'});
+        doc.setFontSize(14);
+        doc.text("Relatório de Fornecimentos",14,15);
+
+        const cabec = ["Data","Fornecedor","Beneficiário","Material",
+                       "Qtd","Preço Unit","Total","Status"];
+        const corpo = filtrados.map(x=>[
+          formatarDataISO(x.data), x.fornecedor, x.beneficiario, x.material,
+          x.quantidade, x.precoUnitario, x.precoTotal, x.status
+        ]);
+        const total = filtrados.reduce((s,x)=>s+parseFloat(x.precoTotal),0).toFixed(2);
+
+        doc.autoTable({
+          head:[cabec],
+          body:corpo,
+          startY:25,
+          styles:{fontSize:8},
+          foot:[['','','','','','Total Geral',total+' MT','']]
+        });
+
+        doc.save("Relatorio_Fornecimentos.pdf");
+      }catch(e){ alert('Erro ao gerar PDF.'); console.error(e); }
+    };
+
+    atualizarTabela();
+  </script>
 </body>
 </html>

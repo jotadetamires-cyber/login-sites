@@ -2,255 +2,105 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Controlo de Dívidas</title>
+<title>Registro Dinâmico</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 20px; }
-  h1 { text-align: center; color: #333; }
-  form, #filtros {
-    background: #fff; padding: 20px; border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 20px auto;
-    max-width: 800px;
-  }
-  label { display:block; margin-top:10px; font-weight:bold; }
-  input, select { width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:5px; }
-  button { background:#007bff; color:#fff; border:none; padding:10px 15px; border-radius:5px; margin-top:15px; cursor:pointer; }
-  button:hover { background:#0056b3; }
-  #gerarPDF, #carregarNaoPagos { background:#6f42c1; display:block; margin:15px auto; }
-  #gerarPDF:hover, #carregarNaoPagos:hover { background:#55309e; }
-  table { width:100%; border-collapse:collapse; max-width:1000px; margin:20px auto; background:#fff; }
-  th, td { border:1px solid #ddd; padding:10px; text-align:center; }
-  th { background:#007bff; color:#fff; }
-  tbody tr:nth-child(even){ background:#f2f2f2; }
-  .btnPago { background:#28a745; color:#fff; padding:5px 10px; border:none; border-radius:4px; cursor:pointer; }
-  .btnPago:hover { background:#1e7e34; }
-  #filtros label { display:inline-block; margin:0 10px; }
-
-  #toast { visibility: hidden; min-width: 250px; margin-left: -125px; background: #28a745; color: #fff;
-           text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 1;
-           right: 20px; top: 20px; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
-  #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-  @keyframes fadein { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-  @keyframes fadeout { from {opacity:1; transform:translateY(0);} to {opacity:0; transform:translateY(-20px);} }
+  table { border-collapse: collapse; }
+  td, th { padding: 5px; border: 1px solid #000; text-align: center; }
+  input { width: 60px; }
 </style>
 </head>
 <body>
+<h2>Registro de Dados</h2>
+<form id="formDados">
+  Data: <input type="date" name="data" required><br><br>
+  Idade (anos): <input type="number" name="idade" required><br><br>
 
-<h1>Controlo de Dívidas</h1>
+  <table id="tabelaMunicipios">
+    <thead>
+      <tr>
+        <th>Município</th><th>Comunidade</th><th>Escola</th><th>Posto Fixo</th><th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Linhas serão inseridas dinamicamente -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4">Total Geral</td>
+        <td><input type="number" name="total" value="0" readonly></td>
+      </tr>
+    </tfoot>
+  </table><br>
 
-<!-- FORMULÁRIO -->
-<form id="formDivida">
-  <label>Nome:</label>
-  <input type="text" id="nome" required>
-
-  <label>Fornecedor:</label>
-  <input type="text" id="fornecedor" required>
-
-  <label>Material:</label>
-  <input type="text" id="material" required>
-
-  <label>Quantidade:</label>
-  <input type="number" id="quantidade" min="1" required>
-
-  <label>Preço Unitário:</label>
-  <input type="number" id="precoUnitario" step="0.01" min="0" required>
-
-  <label>Status:</label>
-  <select id="status" required>
-    <option value="">--Selecione--</option>
-    <option value="Não Pago">Não Pago</option>
-    <option value="Pago">Pago</option>
-    <option value="Cancelado">Cancelado</option>
-  </select>
-
-  <button type="submit">Adicionar Dívida</button>
+  <button type="submit">Enviar</button>
 </form>
 
-<button id="carregarNaoPagos">💰 Carregar Não Pagos</button>
-<button id="gerarPDF">📄 Gerar Relatório PDF</button>
-
-<!-- TABELA -->
-<table>
-  <thead>
-    <tr>
-      <th>Data</th>
-      <th>Nome</th>
-      <th>Fornecedor</th>
-      <th>Material</th>
-      <th>Quantidade</th>
-      <th>Preço Unitário</th>
-      <th>Preço Total</th>
-      <th>Status</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody id="tabelaDividas"></tbody>
-</table>
-
-<!-- FILTROS -->
-<div id="filtros">
-  <label>De: <input type="date" id="dataInicio"></label>
-  <label>Até: <input type="date" id="dataFim"></label>
-  <label>Status:
-    <select id="filtroStatus">
-      <option value="">Todos</option>
-      <option value="Não Pago">Não Pago</option>
-      <option value="Pago">Pago</option>
-      <option value="Cancelado">Cancelado</option>
-    </select>
-  </label>
-</div>
-
-<!-- Toast -->
-<div id="toast">✔️ Pagamento confirmado!</div>
-
-<!-- LIBS PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
 <script>
-const form      = document.getElementById('formDivida');
-const tabela    = document.getElementById('tabelaDividas');
-const gerarPDF  = document.getElementById('gerarPDF');
-const btnNaoPagos = document.getElementById('carregarNaoPagos');
-const toast     = document.getElementById('toast');
+const municipios = ["Mecunica","Mepuera","Metarica","Muhemela","Nacumua","Namicunde","Niputa"];
+const tbody = document.querySelector("#tabelaMunicipios tbody");
 
-let dividas = JSON.parse(localStorage.getItem('dividas')) || [];
+municipios.forEach(m => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${m}</td>
+    <td><input type="number" name="${m}_comunidade" value="0"></td>
+    <td><input type="number" name="${m}_escola" value="0"></td>
+    <td><input type="number" name="${m}_posto" value="0"></td>
+    <td><input type="number" name="${m}_subtotal" value="0" readonly></td>
+  `;
+  tbody.appendChild(tr);
+});
 
-// Substitua pelos seus endpoints do Google Apps Script da aba "Dividas"
-const scriptURL = "https://script.google.com/macros/s/AKfycbxp9KQiHiRThZVnrZX1ZAEnKQD32K--SJ0t5EYxopa_03agO77m5DT426AvTaxK1Zzx/exec";
-const dadosURL  = "https://script.google.com/macros/s/AKfycbxp9KQiHiRThZVnrZX1ZAEnKQD32K--SJ0t5EYxopa_03agO77m5DT426AvTaxK1Zzx/exec";
+const form = document.getElementById('formDados');
 
-function mostrarToast(msg){
-  toast.textContent = msg;
-  toast.className = "show";
-  setTimeout(()=>{ toast.className = toast.className.replace("show",""); }, 3000);
-}
-
-function formatarDataISO(dataISO){
-  return new Date(dataISO).toLocaleDateString('pt-PT');
-}
-
-function parseData(str){
-  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return new Date(str+"T00:00:00");
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)){
-    const [d,m,a] = str.split('/');
-    return new Date(`${a}-${m}-${d}T00:00:00`);
-  }
-  return new Date(str);
-}
-
-function salvarLocal(){
-  localStorage.setItem('dividas', JSON.stringify(dividas));
-}
-
-function atualizarTabela(){
-  tabela.innerHTML = '';
-  dividas.forEach((item,idx)=>{
-    const linha = document.createElement('tr');
-    linha.innerHTML = `
-      <td>${formatarDataISO(item.data)}</td>
-      <td>${item.nome}</td>
-      <td>${item.fornecedor}</td>
-      <td>${item.material}</td>
-      <td>${item.quantidade}</td>
-      <td>${item.precoUnitario.toFixed(2)}</td>
-      <td>${item.precoTotal}</td>
-      <td>${item.status}</td>
-      <td>${item.status==='Não Pago' ? `<button class="btnPago" data-idx="${idx}">Marcar Pago</button>` : ''}</td>`;
-    tabela.appendChild(linha);
+function calcularSubtotais() {
+  let totalGeral = 0;
+  municipios.forEach(m => {
+    const c = Number(form[`${m}_comunidade`].value) || 0;
+    const e = Number(form[`${m}_escola`].value) || 0;
+    const p = Number(form[`${m}_posto`].value) || 0;
+    const subtotal = c + e + p;
+    form[`${m}_subtotal`].value = subtotal;
+    totalGeral += subtotal;
   });
-
-  document.querySelectorAll('.btnPago').forEach(btn=>{
-    btn.onclick = async ()=>{
-      const i = btn.dataset.idx;
-      dividas[i].status = 'Pago';
-      salvarLocal();
-      const linha = btn.closest("tr");
-      linha.cells[7].textContent = "Pago";
-      linha.cells[8].innerHTML = "";
-      mostrarToast("✔️ Pagamento confirmado!");
-      fetch(scriptURL,{ method:"POST", body:JSON.stringify(dividas[i]) });
-    };
-  });
+  form['total'].value = totalGeral;
 }
 
-form.onsubmit = e=>{
+// Recalcular subtotais ao mudar valores
+form.querySelectorAll('input[type=number]').forEach(input => {
+  input.addEventListener('input', calcularSubtotais);
+});
+
+form.addEventListener('submit', e => {
   e.preventDefault();
-  const nome      = document.getElementById('nome').value;
-  const fornecedor= document.getElementById('fornecedor').value;
-  const material  = document.getElementById('material').value;
-  const quantidade= parseFloat(document.getElementById('quantidade').value);
-  const precoUnit = parseFloat(document.getElementById('precoUnitario').value);
-  const status    = document.getElementById('status').value;
+  calcularSubtotais();
+  
+  const dataEnvio = {
+    data: form.data.value,
+    idade: form.idade.value,
+    municipios: municipios.map(m => ({
+      nome: m,
+      comunidade: Number(form[`${m}_comunidade`].value) || 0,
+      escola: Number(form[`${m}_escola`].value) || 0,
+      posto: Number(form[`${m}_posto`].value) || 0,
+      subtotal: Number(form[`${m}_subtotal`].value) || 0
+    })),
+    total: Number(form.total.value) || 0
+  };
 
-  const precoTotal = (quantidade * precoUnit).toFixed(2);
-  const data = new Date().toISOString().split('T')[0];
-
-  const novaDivida = { nome, fornecedor, material, quantidade,
-                       precoUnitario:precoUnit, precoTotal, status, data };
-
-  dividas.push(novaDivida);
-  salvarLocal();
-  atualizarTabela();
-  form.reset();
-
-  fetch(scriptURL,{ method:"POST", body:JSON.stringify(novaDivida) });
-};
-
-btnNaoPagos.onclick = async ()=>{
-  try{
-    const r = await fetch(dadosURL);
-    const lista = await r.json();
-    dividas = lista.filter(x=>x.status==='Não Pago');
-    salvarLocal();
-    atualizarTabela();
-  }catch(e){ alert('Erro ao carregar registros.'); console.error(e); }
-};
-
-gerarPDF.onclick = async ()=>{
-  try{
-    const r = await fetch(dadosURL);
-    const lista = await r.json();
-    const inicio = document.getElementById('dataInicio').value;
-    const fim    = document.getElementById('dataFim').value;
-    const fStatus= document.getElementById('filtroStatus').value;
-
-    const filtrados = lista.filter(item=>{
-      let ok = true;
-      const d = parseData(item.data);
-      if (inicio && d < new Date(inicio+"T00:00:00")) ok=false;
-      if (fim    && d > new Date(fim+"T23:59:59")) ok=false;
-      if (fStatus && item.status !== fStatus) ok=false;
-      return ok;
-    });
-
-    if (!filtrados.length){ alert('Nenhum registro no período.'); return; }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({orientation:'landscape'});
-    doc.setFontSize(14);
-    doc.text("Relatório de Dívidas",14,15);
-
-    const cabec = ["Data","Nome","Fornecedor","Material","Qtd","Preço Unit","Total","Status"];
-    const corpo = filtrados.map(x=>[
-      formatarDataISO(x.data), x.nome, x.fornecedor, x.material,
-      x.quantidade, x.precoUnitario, x.precoTotal, x.status
-    ]);
-    const total = filtrados.reduce((s,x)=>s+parseFloat(x.precoTotal),0).toFixed(2);
-
-    doc.autoTable({
-      head:[cabec],
-      body:corpo,
-      startY:25,
-      styles:{fontSize:8},
-      foot:[['','','','','','Total Geral',total+' MT','']]
-    });
-
-    doc.save("Relatorio_Dividas.pdf");
-  }catch(e){ alert('Erro ao gerar PDF.'); console.error(e); }
-};
-
-atualizarTabela();
+  fetch('SUA_URL_DO_SCRIPT', { // substitua pela URL do Apps Script
+    method: 'POST',
+    body: JSON.stringify(dataEnvio)
+  })
+  .then(res => res.json())
+  .then(res => {
+    if(res.result === "success") alert('Dados enviados com sucesso!');
+    else alert('Erro: '+res.message);
+    form.reset();
+    calcularSubtotais();
+  })
+  .catch(err => alert('Erro: '+err));
+});
 </script>
 </body>
 </html>
